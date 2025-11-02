@@ -15,6 +15,9 @@ export default function App() {
       }
 
       const tg = window.Telegram.WebApp;
+      console.log("window.Telegram =", window.Telegram);
+console.log("window.Telegram?.WebApp =", window.Telegram?.WebApp);
+
       tg.ready();
 
       // 2️⃣ Очікування initData від Telegram
