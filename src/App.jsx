@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import api from "./utils/api"; // твій axios
+import api from "./api"; // твій axios
 
 export default function App() {
   const [userData, setUserData] = useState(null);
