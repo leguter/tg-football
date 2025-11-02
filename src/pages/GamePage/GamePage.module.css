@@ -1,0 +1,146 @@
+.gameContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  color: #fff;
+}
+
+.infoBar {
+  display: flex;
+  justify-content: space-between;
+  width: 90%;
+  max-width: 420px;
+  font-size: 1rem;
+}
+
+.multiplier {
+  color: #00ff95;
+  font-weight: bold;
+}
+
+.field {
+  position: relative;
+  width: 90vw;
+  max-width: 400px;
+  aspect-ratio: 4 / 3;
+  background: #065;
+  overflow: hidden;
+  border-radius: 12px;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.5);
+}
+
+.goalBackground {
+  position: absolute;
+  inset: 0;
+  background: url('/images/background.png') center/cover no-repeat;
+}
+
+.goalFrame {
+  position: absolute;
+  inset: 0;
+}
+
+.hitZone {
+  position: absolute;
+  width: 42px;
+  height: 42px;
+  border: 2px dashed rgba(255, 255, 255, 0.4);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(255, 255, 255, 0.08);
+  transition: 0.2s;
+}
+.hitZone:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+.chosenZone {
+  background: rgba(255, 255, 255, 0.4);
+}
+
+.saveMark,
+.goalMark,
+.missMark {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 22px;
+}
+
+.ballContainer {
+  position: absolute;
+  bottom: 0%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 250px; /* ✅ стало 2.5× більшим */
+  height: 250px;
+  z-index: 6;
+}
+
+.ballImage {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 0 10px rgba(0, 255, 194, 0.5));
+}
+
+
+.ball {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+}
+
+.controls {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.stakeInput {
+  width: 80px;
+  text-align: center;
+  border-radius: 8px;
+}
+
+.primaryButton,
+.cashoutButton,
+.shootButton,
+.randomButton {
+  background: #0084ff;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  color: white;
+  font-weight: bold;
+  transition: background 0.2s;
+}
+
+.cashoutButton {
+  background: #00c853;
+}
+.shootButton {
+  background: #ffb300;
+}
+.randomButton {
+  background: #9c27b0;
+}
+
+.primaryButton:hover,
+.cashoutButton:hover,
+.shootButton:hover,
+.randomButton:hover {
+  filter: brightness(1.15);
+}
+
+.successMessage {
+  color: #00ff95;
+  font-weight: bold;
+}
+.failMessage {
+  color: #ff5c5c;
+  font-weight: bold;
+}

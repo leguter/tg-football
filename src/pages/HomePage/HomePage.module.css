@@ -1,0 +1,47 @@
+/* src/pages/HomePage/HomePage.module.css */
+.homeContainer {
+  text-align: center;
+  padding-top: 2rem;
+}
+
+.homeContainer h1 {
+  color: #00ffc2;
+  margin-bottom: 1rem;
+}
+
+.infoBlock {
+  background-color: #33334f;
+  border-radius: 10px;
+  padding: 1rem;
+  margin: 1.5rem 0;
+  text-align: left;
+}
+
+.infoBlock h2 {
+  color: #f7a072;
+  border-bottom: 1px solid #f7a072;
+  padding-bottom: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.infoBlock li {
+  margin-bottom: 0.5rem;
+  list-style: disc inside;
+}
+
+.startButton {
+  background-color: #00ffc2;
+  color: #1a1a2e;
+  border: none;
+  padding: 1rem 2rem;
+  border-radius: 8px;
+  font-size: 1.2rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: transform 0.2s, background-color 0.2s;
+}
+
+.startButton:hover {
+  background-color: #00e0a5;
+  transform: scale(1.05);
+}
