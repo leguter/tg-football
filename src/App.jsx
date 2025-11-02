@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import GamePage from "./pages/GamePage/GamePage";
 import api from "./api"; // Your configured axios instance
-import { Route, Router } from "react-router-dom";
+import { Route, Router, Routes } from "react-router-dom";
 
 export default function App() {
 const [userData, setUserData] = useState(null);
