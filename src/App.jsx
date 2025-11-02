@@ -92,5 +92,16 @@ const [userData, setUserData] = useState(null);
   }
 
   // When authorized — show GamePage
-  return <GamePage user={userData} />;
+  return (
+    <Router>
+      <Routes>
+        <Route path="/" element={<Layout />}>
+          <Route index element={<HomePage />} />
+          <Route path="game" element={<GamePage />} />
+          <Route path="profile" element={<ProfilePage />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Route>
+      </Routes>
+    </Router>
+  );
 }
