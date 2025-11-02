@@ -21,7 +21,7 @@ export default function GamePage({ user }) {
 
   const ballContainerRef = useRef(null);
   const hitZoneRefs = useRef({});
-
+    console.log(user)
   useEffect(() => {
     GAME_ANGLES.forEach(a => (hitZoneRefs.current[a.id] = { current: null }));
 
@@ -70,7 +70,7 @@ export default function GamePage({ user }) {
   return (
     <div className={styles.gameContainer}>
       <div className={styles.infoBar}>
-        <p>👤 {user.first_name}</p>
+        <p>👤 {user.user.first_name}</p>
         <p>Множник: <span className={styles.multiplier}>{multiplier.toFixed(2)}x</span></p>
         <p>Ставка: ⭐ {stake}</p>
       </div>
