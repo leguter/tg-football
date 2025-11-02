@@ -1,7 +1,7 @@
 // src/utils/telegramAuth.js
 import axios from 'axios';
 
-const API_URL = 'http://localhost:4000/api/auth';
+const API_URL = 'https://football-back-4jkg.onrender.com/api/auth';
 
 export async function loginViaTelegram() {
   const tg = window.Telegram.WebApp;

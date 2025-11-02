@@ -1,5 +1,5 @@
 // src/pages/ProfilePage/ProfilePage.jsx
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import styles from './ProfilePage.module.css';
 
 export default function ProfilePage() {
