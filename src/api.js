@@ -1,17 +1,15 @@
-import axios from "axios";
+import axios from 'axios';
 
 const api = axios.create({
-  baseURL: "https://football-back-4jkg.onrender.com",
-  headers: { "Content-Type": "application/json" },
+  baseURL: 'https://football-back-4jkg.onrender.com',
 });
 
-// 🔐 додаємо Telegram initData до кожного запиту
 api.interceptors.request.use((config) => {
-  const tg = window.Telegram?.WebApp;
-  if (tg?.initData) {
-    config.data = { ...(config.data || {}), initData: tg.initData };
+  const token = localStorage.getItem('authToken');
+  if (token) {
+    config.headers['X-Telegram-User'] = token; // 👈 зручно замість JWT
   }
   return config;
-});
+}, (error) => Promise.reject(error));
 
 export default api;
