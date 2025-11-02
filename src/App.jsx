@@ -3,24 +3,24 @@ import GamePage from "./pages/GamePage/GamePage";
 import api from "./api"; // axios інстанс, який ми налаштували
 
 export default function App() {
-  const [userData, setUserData] = useState(null);
+const [userData, setUserData] = useState(null);
 
   useEffect(() => {
-    const init = async () => {
-      // 1️⃣ Перевірка Telegram WebApp
-      if (!window.Telegram || !window.Telegram.WebApp) {
-        console.warn("⚠️ Telegram WebApp не знайдено. Відкрий додаток через Telegram.");
-        setUserData({ error: true });
-        return;
+    const tg = window.Telegram.WebApp;
+    tg.ready();
+
+    // Функція для реєстрації реферала
+    const registerReferral = async (referrerId) => {
+      try {
+        // Цей запит тепер буде мати правильний 'authToken'
+        await api.post('/api/user/referral/register', { referrerId });
+        console.log('✅ Referral registered successfully!');
+      } catch (err) {
+        console.warn('Referral registration failed (this is often OK):', err.response?.data?.message);
       }
+    };
 
-      const tg = window.Telegram.WebApp;
-      console.log("window.Telegram =", window.Telegram);
-console.log("window.Telegram?.WebApp =", window.Telegram?.WebApp);
-
-      tg.ready();
-
-      // 2️⃣ Очікування initData від Telegram
+    const waitForInitData = async () => {
       let attempts = 0;
       while (!tg.initData && attempts < 10) {
         await new Promise(res => setTimeout(res, 300));
@@ -28,43 +28,60 @@ console.log("window.Telegram?.WebApp =", window.Telegram?.WebApp);
       }
 
       if (!tg.initData) {
-        console.error("❌ Не отримано initData від Telegram");
+        console.error("❌ Не знайдено initData навіть після очікування");
         setUserData({ error: true });
         return;
       }
 
       try {
-        // 3️⃣ Надсилаємо initData на бекенд для авторизації
-        const res = await api.post("/api/auth", { initData: tg.initData });
+        // console.log("📤 Відправляємо initData:", tg.initData);
 
-        // 4️⃣ Зберігаємо userId як токен
-        localStorage.setItem("authToken", res.data.id);
-        setUserData(res.data);
-
-        // 5️⃣ Якщо є реферал у URL
+        // 1. АВТЕНТИФІКАЦІЯ
+        const res = await api.post(
+          "/api/auth",
+          { initData: tg.initData }
+        );
+        
+        // console.log("✅ Отримано userData:", res.data);
+        localStorage.setItem("authToken", res.data.token);
+        
+        // 2. ❗️ РЕФАКТОРИНГ ЛОГІКИ РЕЄСТРАЦІЇ РЕФЕРАЛА ❗️
+        
+        // Створюємо об'єкт для роботи з параметрами URL
         const params = new URLSearchParams(window.location.search);
-        const referrerId = params.get("referrer_id");
+        
+        // Дістаємо 'referrer_id' з URL (https://...app?referrer_id=12345)
+        // Це той 'referrer_id', який ваш bot.py успішно додає!
+        const referrerId = params.get('referrer_id'); 
+  
+        // console.log(`Перевірка referrer_id (з URL): ${referrerId || 'НЕ ЗНАЙДЕНО'}`);
+  
+        // ❗️ Ми більше не перевіряємо ненадійний 'start_param'.
+        // Ми перевіряємо 'referrerId' з URL.
         if (referrerId) {
-          try {
-            await api.post("/api/user/referral/register", { referrerId });
-            console.log("✅ Referral registered successfully");
-          } catch (err) {
-            console.warn("Referral registration failed:", err.response?.data?.message);
-          }
+          await registerReferral(referrerId);
         }
 
+        // 3. ВСТАНОВЛЕННЯ ДАНИХ
+        setUserData(res.data);
+
       } catch (err) {
-        console.error("❌ Помилка авторизації:", err.response?.data || err.message);
+        const errorMessage = err.response ? err.response.data.message : "Помилка автентифікації";
+        console.error("❌ Помилка під час авторизації:", errorMessage);
         setUserData({ error: true });
       }
     };
 
-    init();
-  }, []);
+    waitForInitData();
+  }, []); // Пустий масив гарантує, що це виконається один раз
 
-  // 6️⃣ UI
-  if (!userData) return <div>🔄 Завантаження...</div>;
-  if (userData.error) return <div>❌ Відкрийте додаток через Telegram</div>;
+  if (userData === null) {
+    return <div>Завантаження...</div>; // Або ваш компонент завантажувача
+  }
+
+  if (userData?.error) {
+    return <div>Запустіть додаток через Telegram для авторизації</div>;
+  }
 
   // 7️⃣ Коли авторизований — відображаємо GamePage
   return <GamePage user={userData} />;
