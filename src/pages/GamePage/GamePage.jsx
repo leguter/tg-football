@@ -283,7 +283,7 @@ const handleCashout = async () => {
           Множник: <span className={styles.multiplier}>{multiplier.toFixed(2)}x</span>
         </p>
         <p>Ставка: ⭐ {stake}</p>
-        <p>Баланс: ⭐ {user?.balance ?? 0}</p>
+        <p>Баланс: ⭐ {user.user?.balance ?? 0}</p>
       </div>
 
       <div className={styles.field}>
