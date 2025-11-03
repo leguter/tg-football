@@ -212,57 +212,64 @@ export default function GamePage({ user, setUser }) {
   const ballContainerRef = useRef(null);
   const hitZoneRefs = useRef({});
   useEffect(() => {
+  console.log("initData:", window.Telegram?.WebApp?.initData);
+}, []);
+  useEffect(() => {
     GAME_ANGLES.forEach(a => (hitZoneRefs.current[a.id] = { current: null }));
 
-    const startGame = async () => {
-      try {
-        const res = await api.post("/api/game/start", { stake });
-        setMultiplier(res.data.multiplier);
-        if (res.data.balance !== undefined) {
-          setUser(prev => ({ ...prev, balance: res.data.balance }));
-        }
-      } catch (err) {
-        console.error("Start game error:", err.response?.data || err.message);
-      }
-    };
+const startGame = async () => {
+  try {
+    const initData = window.Telegram?.WebApp?.initData || "";
+    const res = await api.post("/api/game/start", { stake, initData });
+    setMultiplier(res.data.multiplier);
+    if (res.data.balance !== undefined) {
+      setUser(prev => ({ ...prev, balance: res.data.balance }));
+    }
+  } catch (err) {
+    console.error("Start game error:", err.response?.data || err.message);
+  }
+};
     startGame();
   }, [stake, setUser]);
 
-  const handleShoot = async (angleId) => {
-    if (isShooting || !angleId) return;
-    setIsShooting(true);
-    setChosenAngle(angleId);
+const handleShoot = async (angleId) => {
+  if (isShooting || !angleId) return;
+  setIsShooting(true);
+  setChosenAngle(angleId);
 
-    try {
-      const res = await api.post("/api/game/shoot", { angleId, currentMultiplier: multiplier });
-      setLastResult(res.data);
-      setMultiplier(res.data.multiplier);
-      setCanCashout(res.data.isGoal);
-      if (res.data.balance !== undefined) {
-        setUser(prev => ({ ...prev, balance: res.data.balance }));
-      }
-    } catch (err) {
-      console.error("Shoot error:", err.response?.data || err.message);
-    } finally {
-      setTimeout(() => setIsShooting(false), 1000);
+  try {
+    const initData = window.Telegram?.WebApp?.initData || "";
+    const res = await api.post("/api/game/shoot", { angleId, initData });
+    setLastResult(res.data);
+    setMultiplier(res.data.multiplier);
+    setCanCashout(res.data.isGoal);
+    if (res.data.balance !== undefined) {
+      setUser(prev => ({ ...prev, balance: res.data.balance }));
     }
-  };
+  } catch (err) {
+    console.error("Shoot error:", err.response?.data || err.message);
+  } finally {
+    setTimeout(() => setIsShooting(false), 1000);
+  }
+};
 
-  const handleCashout = async () => {
-    try {
-      const res = await api.post("/api/game/cashout");
-      alert(`⭐ Ви забрали ${res.data.winnings} зірок!`);
-      setCanCashout(false);
-      setMultiplier(1.0);
-      setChosenAngle(null);
-      setLastResult(null);
-      if (res.data.balance !== undefined) {
-        setUser(prev => ({ ...prev, balance: res.data.balance }));
-      }
-    } catch (err) {
-      console.error("Cashout error:", err.response?.data || err.message);
+const handleCashout = async () => {
+  try {
+    const initData = window.Telegram?.WebApp?.initData || "";
+    const res = await api.post("/api/game/cashout", { initData });
+    alert(`⭐ Ви забрали ${res.data.winnings} зірок!`);
+    setCanCashout(false);
+    setMultiplier(1.0);
+    setChosenAngle(null);
+    setLastResult(null);
+    if (res.data.balance !== undefined) {
+      setUser(prev => ({ ...prev, balance: res.data.balance }));
     }
-  };
+  } catch (err) {
+    console.error("Cashout error:", err.response?.data || err.message);
+  }
+};
+
 
   const handleRandomShoot = () => {
     const randomAngle = GAME_ANGLES[Math.floor(Math.random() * GAME_ANGLES.length)].id;
