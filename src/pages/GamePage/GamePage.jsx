@@ -148,7 +148,7 @@
 //     </div>
 //   );
 // }
-import { useEffect, useState, useRef, useMemo } from "react";
+import { useEffect, useState, useRef } from "react";
 import { motion } from "framer-motion";
 import api from "../../api";
 import styles from "./GamePage.module.css";
@@ -163,29 +163,17 @@ const GAME_ANGLES = [
 
 // --- Компонент м’яча з анімацією ---
 const Ball = ({ chosenAngle, isShooting, hitZoneRefs, ballContainerRef, lastResult }) => {
-  const fieldRef = ballContainerRef.current?.closest(`.${styles.field}`);
-  const initial = useMemo(() => ({ x: 0, y: 0, scale: 1, rotate: 0 }), []);
-
-  const final = useMemo(() => {
-    const targetRef = hitZoneRefs[chosenAngle];
-    if (!targetRef?.current || !ballContainerRef?.current || !fieldRef) return initial;
-
-    const targetRect = targetRef.current.getBoundingClientRect();
-    const fieldRect = fieldRef.getBoundingClientRect();
-    const ballRect = ballContainerRef.current.getBoundingClientRect();
-
-    const targetX = targetRect.left + targetRect.width / 2 - fieldRect.left;
-    const targetY = targetRect.top + targetRect.height / 2 - fieldRect.top;
-    const ballX = ballRect.left + ballRect.width / 2 - fieldRect.left;
-    const ballY = ballRect.top + ballRect.height / 2 - fieldRect.top;
-
-    const dx = targetX - ballX;
-    const dy = targetY - ballY;
-
-    return { dx, dy };
-  }, [chosenAngle, hitZoneRefs, ballContainerRef, fieldRef, initial]);
-
   if (!chosenAngle || !isShooting) return null;
+
+  const targetRef = hitZoneRefs[chosenAngle];
+  if (!targetRef?.current || !ballContainerRef?.current) return null;
+
+  const targetRect = targetRef.current.getBoundingClientRect();
+  const fieldRect = ballContainerRef.current.parentElement.getBoundingClientRect();
+  const ballRect = ballContainerRef.current.getBoundingClientRect();
+
+  const dx = targetRect.left + targetRect.width / 2 - ballRect.left - ballRect.width / 2;
+  const dy = targetRect.top + targetRect.height / 2 - ballRect.top - ballRect.height / 2;
 
   const isGoal = lastResult?.isGoal;
 
@@ -194,8 +182,8 @@ const Ball = ({ chosenAngle, isShooting, hitZoneRefs, ballContainerRef, lastResu
       className={styles.ball}
       initial={{ x: 0, y: 0, scale: 1 }}
       animate={{
-        x: final.dx,
-        y: final.dy,
+        x: dx,
+        y: dy,
         rotate: 360,
         transition: { duration: 0.8, ease: [0.42, 0, 0.58, 1] },
       }}
@@ -213,7 +201,6 @@ const Ball = ({ chosenAngle, isShooting, hitZoneRefs, ballContainerRef, lastResu
   );
 };
 
-// --- Основна сторінка гри ---
 export default function GamePage({ user, setUser }) {
   const [stake, setStake] = useState(100);
   const [multiplier, setMultiplier] = useState(1.0);
@@ -224,12 +211,9 @@ export default function GamePage({ user, setUser }) {
 
   const ballContainerRef = useRef(null);
   const hitZoneRefs = useRef({});
-  if (Object.keys(hitZoneRefs.current).length === 0) {
-    GAME_ANGLES.forEach(a => (hitZoneRefs.current[a.id] = { current: null }));
-  }
-
-  // --- Старт гри при завантаженні ---
   useEffect(() => {
+    GAME_ANGLES.forEach(a => (hitZoneRefs.current[a.id] = { current: null }));
+
     const startGame = async () => {
       try {
         const res = await api.post("/api/game/start", { stake });
@@ -242,18 +226,17 @@ export default function GamePage({ user, setUser }) {
       }
     };
     startGame();
-  }, [setUser, stake]);
+  }, [stake, setUser]);
 
-  // --- Удар по воротах ---
   const handleShoot = async (angleId) => {
-    if (!angleId || isShooting) return;
+    if (isShooting || !angleId) return;
     setIsShooting(true);
     setChosenAngle(angleId);
 
     try {
       const res = await api.post("/api/game/shoot", { angleId, currentMultiplier: multiplier });
       setLastResult(res.data);
-      setMultiplier(parseFloat(res.data.multiplier));
+      setMultiplier(res.data.multiplier);
       setCanCashout(res.data.isGoal);
       if (res.data.balance !== undefined) {
         setUser(prev => ({ ...prev, balance: res.data.balance }));
@@ -265,13 +248,6 @@ export default function GamePage({ user, setUser }) {
     }
   };
 
-  // --- Випадковий удар ---
-  const handleRandomShoot = () => {
-    const randomAngle = GAME_ANGLES[Math.floor(Math.random() * GAME_ANGLES.length)].id;
-    handleShoot(randomAngle);
-  };
-
-  // --- Кешаут ---
   const handleCashout = async () => {
     try {
       const res = await api.post("/api/game/cashout");
@@ -288,8 +264,10 @@ export default function GamePage({ user, setUser }) {
     }
   };
 
-  const canHit = !isShooting && chosenAngle && !canCashout;
-  const nextShotEnabled = canCashout && !isShooting;
+  const handleRandomShoot = () => {
+    const randomAngle = GAME_ANGLES[Math.floor(Math.random() * GAME_ANGLES.length)].id;
+    handleShoot(randomAngle);
+  };
 
   return (
     <div className={styles.gameContainer}>
@@ -297,14 +275,12 @@ export default function GamePage({ user, setUser }) {
         <p>
           Множник: <span className={styles.multiplier}>{multiplier.toFixed(2)}x</span>
         </p>
+        <p>Ставка: ⭐ {stake}</p>
         <p>Баланс: ⭐ {user?.balance ?? 0}</p>
       </div>
 
       <div className={styles.field}>
         <div className={styles.goalBackground}>
-          <img src="/images/goal-bg.png" alt="Ворота" className={styles.goalImage} />
-          <img src="/images/keeper.png" alt="Воротар" className={styles.keeperImage} />
-
           <div className={styles.goalFrame}>
             {GAME_ANGLES.map(angle => (
               <button
@@ -353,12 +329,16 @@ export default function GamePage({ user, setUser }) {
             <button onClick={handleCashout} className={styles.cashoutButton}>
               Забрати ⭐ {Math.floor(stake * multiplier)}
             </button>
-            <button onClick={() => handleShoot(chosenAngle)} className={styles.shootButton} disabled={!nextShotEnabled}>
+            <button onClick={() => handleShoot(chosenAngle)} className={styles.shootButton}>
               Наступний удар
             </button>
           </>
         ) : (
-          <button onClick={() => handleShoot(chosenAngle)} className={styles.primaryButton} disabled={!canHit}>
+          <button
+            onClick={() => handleShoot(chosenAngle)}
+            className={styles.primaryButton}
+            disabled={!chosenAngle || isShooting}
+          >
             Ударити
           </button>
         )}
