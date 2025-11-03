@@ -153,7 +153,6 @@ import { motion } from "framer-motion";
 import api from "../../api";
 import styles from "./GamePage.module.css";
 
-// --- Кути для ударів ---
 const GAME_ANGLES = [
   { id: 1, name: 'Top Left', x: '25%', y: '35%' },
   { id: 2, name: 'Top Center', x: '52%', y: '32%' },
@@ -215,7 +214,7 @@ const Ball = ({ chosenAngle, isShooting, hitZoneRefs, ballContainerRef, lastResu
 };
 
 // --- Основна сторінка гри ---
-export default function GamePage({ user }) {
+export default function GamePage({ user, setUser }) {
   const [stake, setStake] = useState(100);
   const [multiplier, setMultiplier] = useState(1.0);
   const [chosenAngle, setChosenAngle] = useState(null);
@@ -235,12 +234,15 @@ export default function GamePage({ user }) {
       try {
         const res = await api.post("/api/game/start", { stake });
         setMultiplier(res.data.multiplier);
+        if (res.data.balance !== undefined) {
+          setUser(prev => ({ ...prev, balance: res.data.balance }));
+        }
       } catch (err) {
         console.error("Start game error:", err.response?.data || err.message);
       }
     };
     startGame();
-  }, []);
+  }, [setUser, stake]);
 
   // --- Удар по воротах ---
   const handleShoot = async (angleId) => {
@@ -253,6 +255,9 @@ export default function GamePage({ user }) {
       setLastResult(res.data);
       setMultiplier(parseFloat(res.data.multiplier));
       setCanCashout(res.data.isGoal);
+      if (res.data.balance !== undefined) {
+        setUser(prev => ({ ...prev, balance: res.data.balance }));
+      }
     } catch (err) {
       console.error("Shoot error:", err.response?.data || err.message);
     } finally {
@@ -275,6 +280,9 @@ export default function GamePage({ user }) {
       setMultiplier(1.0);
       setChosenAngle(null);
       setLastResult(null);
+      if (res.data.balance !== undefined) {
+        setUser(prev => ({ ...prev, balance: res.data.balance }));
+      }
     } catch (err) {
       console.error("Cashout error:", err.response?.data || err.message);
     }
@@ -289,11 +297,14 @@ export default function GamePage({ user }) {
         <p>
           Множник: <span className={styles.multiplier}>{multiplier.toFixed(2)}x</span>
         </p>
-        <p>Ставка: ⭐ {stake}</p>
+        <p>Баланс: ⭐ {user?.balance ?? 0}</p>
       </div>
 
       <div className={styles.field}>
         <div className={styles.goalBackground}>
+          <img src="/images/goal-bg.png" alt="Ворота" className={styles.goalImage} />
+          <img src="/images/keeper.png" alt="Воротар" className={styles.keeperImage} />
+
           <div className={styles.goalFrame}>
             {GAME_ANGLES.map(angle => (
               <button
