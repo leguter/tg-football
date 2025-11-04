@@ -78,7 +78,7 @@ export default function ProfilePage() {
 //     alert("Помилка при створенні депозиту!");
 //   }
 // };
-const handleDeposit = async (amount) => {
+const handleDeposit = async () => {
 
 
     // setLoading(true);
@@ -86,7 +86,7 @@ const handleDeposit = async (amount) => {
     setMessage("");
 
     try {
-      const res = await api.post("/api/deposit/create_invoice", { amount });
+      const res = await api.post("/api/deposit/create_invoice", { selectedAmount });
       if (!res.data?.success) return setMessage("Failed to create invoice");
 
       const { invoice_link, payload } = res.data;
