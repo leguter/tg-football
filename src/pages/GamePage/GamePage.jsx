@@ -161,6 +161,7 @@ const GAME_ANGLES = [
   { id: 5, name: "Bottom Right", x: "77%", y: "67%" },
 ];
 
+// --- Компонент м’яча (без змін) ---
 const Ball = ({ chosenAngle, isShooting, hitZoneRefs, ballContainerRef, lastResult }) => {
   if (!chosenAngle || !isShooting) return null;
 
@@ -204,6 +205,7 @@ const Ball = ({ chosenAngle, isShooting, hitZoneRefs, ballContainerRef, lastResu
   );
 };
 
+// --- Компонент сторінки (з виправленням) ---
 export default function GamePage({ user, setUser }) {
   const [stake, setStake] = useState(100);
   const [multiplier, setMultiplier] = useState(1.0);
@@ -231,7 +233,14 @@ export default function GamePage({ user, setUser }) {
         try {
           const startRes = await api.post("/api/game/start", { stake, initData });
           if (startRes.data.balance !== undefined) {
-            setUser((prev) => ({ ...prev, balance: startRes.data.balance }));
+            // Коректне оновлення вкладеного балансу
+            setUser((prev) => ({
+              ...prev,
+              user: {
+                ...prev.user,
+                balance: startRes.data.balance,
+              },
+            }));
           }
         } catch (err) {
           console.error("Start game error:", err.response?.data || err.message);
@@ -264,7 +273,14 @@ export default function GamePage({ user, setUser }) {
       setLastResult(null);
 
       if (res.data.balance !== undefined) {
-        setUser((prev) => ({ ...prev, balance: res.data.balance }));
+        // Коректне оновлення вкладеного балансу
+        setUser((prev) => ({
+          ...prev,
+          user: {
+            ...prev.user,
+            balance: res.data.balance,
+          },
+        }));
       }
     } catch (err) {
       console.error("Cashout error:", err.response?.data || err.message);
@@ -285,7 +301,9 @@ export default function GamePage({ user, setUser }) {
           Множник: <span className={styles.multiplier}>{multiplier.toFixed(2)}x</span>
         </p>
         <p>Ставка: ⭐ {stake}</p>
-        <p>Баланс: ⭐ {user.user.balance ?? 0}</p>
+        
+        {/* Використовуємо вкладеність user.user.balance */}
+        <p>Баланс: ⭐ {user?.user?.balance ?? 0}</p>
       </div>
 
       <div className={styles.field}>
@@ -333,7 +351,11 @@ export default function GamePage({ user, setUser }) {
           className={styles.stakeInput}
           disabled={isShooting || multiplier !== 1.0}
         />
-        <button onClick={handleRandomShoot} className={styles.randomButton} disabled={isShooting}>
+        <button
+          onClick={handleRandomShoot}
+          className={styles.randomButton}
+          disabled={isShooting}
+        >
           Випадково
         </button>
 
@@ -342,7 +364,10 @@ export default function GamePage({ user, setUser }) {
             <button onClick={handleCashout} className={styles.cashoutButton}>
               Забрати ⭐ {Math.floor(stake * multiplier)}
             </button>
-            <button onClick={() => handleShoot(chosenAngle)} className={styles.shootButton}>
+            <button
+              onClick={() => handleShoot(chosenAngle)}
+              className={styles.shootButton}
+            >
               Наступний удар
             </button>
           </>
