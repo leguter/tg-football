@@ -150,8 +150,11 @@
 // }
 import { useEffect, useState, useRef } from "react";
 import { motion } from "framer-motion";
-import api from "../../api";
+import axios from "axios"; // 🟢 FIX: Імпортуємо axios напряму
 import styles from "./GamePage.module.css";
+
+// 🟢 FIX: Вказуємо URL бекенду тут
+const API_URL = "https://football-back-4jkg.onrender.com";
 
 const GAME_ANGLES = [
   { id: 1, name: "Top Left", x: "25%", y: "35%" },
@@ -164,19 +167,14 @@ const GAME_ANGLES = [
 // --- Компонент м’яча (без змін) ---
 const Ball = ({ chosenAngle, isShooting, hitZoneRefs, ballContainerRef, lastResult }) => {
   if (!chosenAngle || !isShooting) return null;
-
   const targetRef = hitZoneRefs[chosenAngle];
   if (!targetRef?.current || !ballContainerRef?.current) return null;
-
   const targetRect = targetRef.current.getBoundingClientRect();
   const fieldRect = ballContainerRef.current.parentElement.getBoundingClientRect();
   const ballRect = ballContainerRef.current.getBoundingClientRect();
-
   const dx = targetRect.left + targetRect.width / 2 - ballRect.left - ballRect.width / 2;
   const dy = targetRect.top + targetRect.height / 2 - ballRect.top - ballRect.height / 2;
-
   const isGoal = lastResult?.isGoal;
-
   return (
     <motion.div
       className={styles.ball}
@@ -221,19 +219,33 @@ export default function GamePage({ user, setUser }) {
     GAME_ANGLES.forEach((a) => (hitZoneRefs.current[a.id] = { current: null }));
   }, []);
 
-const handleShoot = async (angleId) => {
+  // 🟢 FIX: Створюємо функцію для надсилання запитів з потрібними даними
+  const postApi = (endpoint, data) => {
+    const initData = window.Telegram?.WebApp?.initData || "";
+    const tgUser = window.Telegram?.WebApp?.initDataUnsafe?.user;
+    
+    // Передаємо initData в тілі, як очікує ваш бекенд
+    const body = { ...data, initData };
+
+    return axios.post(`${API_URL}${endpoint}`, body, {
+      withCredentials: true, // Для сесій
+      headers: {
+        // Додаємо заголовок, як це робив ваш api.js
+        "x-telegram-user": tgUser ? JSON.stringify(tgUser) : "",
+      },
+    });
+  };
+
+  const handleShoot = async (angleId) => {
     if (isShooting || !angleId) return;
     setIsShooting(true);
     setChosenAngle(angleId);
 
     try {
-      // 🟢 FIX: Ми будемо отримувати initData ДВІЧІ,
-      // по одному разу для кожного запиту, щоб уникнути конфліктів axios.
-      
       if (multiplier === 1.0 && !canCashout) {
         try {
-          const initDataForStart = window.Telegram?.WebApp?.initData || "";
-          const startRes = await api.post("/api/game/start", { stake, initData: initDataForStart });
+          // 🟢 FIX: Використовуємо нашу нову функцію postApi
+          const startRes = await postApi("/api/game/start", { stake });
           
           if (startRes.data.balance !== undefined) {
             setUser((prev) => ({
@@ -249,16 +261,15 @@ const handleShoot = async (angleId) => {
         }
       }
 
-      // 🟢 FIX: Отримуємо initData вдруге, свіжий, для запиту /shoot
-      const initDataForShoot = window.Telegram?.WebApp?.initData || "";
-      const res = await api.post("/api/game/shoot", { angleId, initData: initDataForShoot });
+      // 🟢 FIX: Використовуємо нашу нову функцію postApi
+      const res = await postApi("/api/game/shoot", { angleId });
       
       setLastResult(res.data);
       setMultiplier(res.data.multiplier);
       setCanCashout(res.data.isGoal);
 
     } catch (err) {
-      console.error("❌ Shoot error:", err.message, err.response?.data);
+      console.error("❌ Shoot error:", err.response?.data || err.message);
     } finally {
       setTimeout(() => setIsShooting(false), 1000);
     }
@@ -266,8 +277,9 @@ const handleShoot = async (angleId) => {
 
   const handleCashout = async () => {
     try {
-      const initData = window.Telegram?.WebApp?.initData || "";
-      const res = await api.post("/api/game/cashout", { initData });
+      // 🟢 FIX: Використовуємо нашу нову функцію postApi
+      const res = await postApi("/api/game/cashout", {});
+      
       alert(`⭐ Ви забрали ${res.data.winnings} зірок!`);
 
       setCanCashout(false);
@@ -276,13 +288,9 @@ const handleShoot = async (angleId) => {
       setLastResult(null);
 
       if (res.data.balance !== undefined) {
-        // Коректне оновлення вкладеного балансу
         setUser((prev) => ({
           ...prev,
-          user: {
-            ...prev.user,
-            balance: res.data.balance,
-          },
+          user: { ...prev.user, balance: res.data.balance },
         }));
       }
     } catch (err) {
@@ -304,8 +312,6 @@ const handleShoot = async (angleId) => {
           Множник: <span className={styles.multiplier}>{multiplier.toFixed(2)}x</span>
         </p>
         <p>Ставка: ⭐ {stake}</p>
-        
-        {/* Використовуємо вкладеність user.user.balance */}
         <p>Баланс: ⭐ {user?.user?.balance ?? 0}</p>
       </div>
 
