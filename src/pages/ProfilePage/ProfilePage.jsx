@@ -15,46 +15,68 @@ export default function ProfilePage() {
   const [selectedAmount, setSelectedAmount] = useState(100);
 
   // Вибір можливих сум
-  const starOptions = [10, 50, 100, 500, 1000];
+  const starOptions = [1, 50, 100, 500, 1000];
 
   // ==============================
   // 💰 Депозит (через бекенд)
   // ==============================
-  const handleDeposit = async () => {
-    try {
-      const res = await api.post(
-        "/api/stars/deposit",
-        { amount: selectedAmount },
-        { withCredentials: true } // якщо auth через cookie
-      );
+const handleDeposit = async () => {
+  try {
+    const res = await api.post(
+      "/api/stars/deposit",
+      { amount: selectedAmount },
+      { withCredentials: true }
+    );
 
-      if (res.data.success) {
-        const invoiceLink = res.data.invoice_link;
+    if (res.data.success) {
+      const invoiceLink = res.data.invoice_link;
+      const tg = window.Telegram?.WebApp;
 
-        // Відкриваємо Telegram меню оплати (XTR)
-        window.open(invoiceLink, "_blank");
+      // ✅ Відкриваємо Telegram Invoice меню прямо в Mini App
+      if (tg && tg.openInvoice) {
+        tg.openInvoice(invoiceLink, async (status) => {
+          console.log("🧾 Telegram invoice status:", status);
 
-        // Додаємо в історію подію (очікування оплати)
-        setHistory((prev) => [
-          {
-            id: Date.now(),
-            type: "Deposit",
-            amount: selectedAmount,
-            date: new Date().toISOString().slice(0, 10),
-            multiplier: "-",
-          },
-          ...prev,
-        ]);
-
-        setShowDepositModal(false);
+          if (status === "paid") {
+            try {
+              const completeRes = await api.post("/api/stars/complete", { amount: selectedAmount });
+              setBalance(completeRes.data.internal_stars);
+              alert("✅ Оплата успішна! Баланс оновлено.");
+            } catch (err) {
+              console.error("Error after payment:", err);
+              alert("Помилка при оновленні балансу після оплати!");
+            }
+          } else if (status === "failed") {
+            alert("❌ Оплата не пройшла.");
+          } else if (status === "cancelled") {
+            alert("❌ Ви скасували оплату.");
+          }
+        });
       } else {
-        alert("Не вдалося створити депозит!");
+        // fallback — якщо користувач не в Telegram Mini App
+        window.open(invoiceLink, "_blank");
       }
-    } catch (err) {
-      console.error("Deposit error:", err);
-      alert("Помилка при створенні депозиту!");
+
+      setHistory((prev) => [
+        {
+          id: Date.now(),
+          type: "Deposit",
+          amount: selectedAmount,
+          date: new Date().toISOString().slice(0, 10),
+          multiplier: "-",
+        },
+        ...prev,
+      ]);
+      setShowDepositModal(false);
+    } else {
+      alert("Не вдалося створити депозит!");
     }
-  };
+  } catch (err) {
+    console.error("Deposit error:", err);
+    alert("Помилка при створенні депозиту!");
+  }
+};
+
 
   // ==============================
   // 💸 Вивід (через бекенд)
