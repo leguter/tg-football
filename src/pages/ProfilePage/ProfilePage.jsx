@@ -86,7 +86,7 @@ const handleDeposit = async () => {
     setMessage("");
 
     try {
-      const res = await api.post("/api/deposit/create_invoice", { selectedAmount });
+      const res = await api.post("/api/stars/deposit", { selectedAmount });
       if (!res.data?.success) return setMessage("Failed to create invoice");
 
       const { invoice_link, payload } = res.data;
@@ -103,7 +103,7 @@ const handleDeposit = async () => {
             setMessage("✅ Payment is completed. We are checking the server...");
 
             try {
-              const completeRes = await api.post("/api/deposit/complete", { payload });
+              const completeRes = await api.post("/api/stars/complete", { payload });
               if (completeRes.data?.success) {
                 setBalance(completeRes.data.balance);
                 setMessage("💰 Balance updated!");
