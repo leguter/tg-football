@@ -154,14 +154,13 @@ import api from "../../api";
 import styles from "./GamePage.module.css";
 
 const GAME_ANGLES = [
-  { id: 1, name: 'Top Left', x: '25%', y: '35%' },
-  { id: 2, name: 'Top Center', x: '52%', y: '32%' },
-  { id: 3, name: 'Top Right', x: '77%', y: '35%' },
-  { id: 4, name: 'Bottom Left', x: '25%', y: '67%' },
-  { id: 5, name: 'Bottom Right', x: '77%', y: '67%' },
+  { id: 1, name: "Top Left", x: "25%", y: "35%" },
+  { id: 2, name: "Top Center", x: "52%", y: "32%" },
+  { id: 3, name: "Top Right", x: "77%", y: "35%" },
+  { id: 4, name: "Bottom Left", x: "25%", y: "67%" },
+  { id: 5, name: "Bottom Right", x: "77%", y: "67%" },
 ];
 
-// --- Компонент м’яча з анімацією ---
 const Ball = ({ chosenAngle, isShooting, hitZoneRefs, ballContainerRef, lastResult }) => {
   if (!chosenAngle || !isShooting) return null;
 
@@ -190,8 +189,12 @@ const Ball = ({ chosenAngle, isShooting, hitZoneRefs, ballContainerRef, lastResu
       onAnimationComplete={() => {
         if (!isGoal) {
           ballContainerRef.current?.animate(
-            [{ transform: 'translateY(0)' }, { transform: 'translateY(-25px)' }, { transform: 'translateY(0)' }],
-            { duration: 400, easing: 'ease-out' }
+            [
+              { transform: "translateY(0)" },
+              { transform: "translateY(-25px)" },
+              { transform: "translateY(0)" },
+            ],
+            { duration: 400, easing: "ease-out" }
           );
         }
       }}
@@ -211,68 +214,67 @@ export default function GamePage({ user, setUser }) {
 
   const ballContainerRef = useRef(null);
   const hitZoneRefs = useRef({});
+
   useEffect(() => {
-  console.log("initData:", window.Telegram?.WebApp?.initData);
-}, []);
-  useEffect(() => {
-    GAME_ANGLES.forEach(a => (hitZoneRefs.current[a.id] = { current: null }));
+    GAME_ANGLES.forEach((a) => (hitZoneRefs.current[a.id] = { current: null }));
+  }, []);
 
-const startGame = async () => {
-  try {
-    const initData = window.Telegram?.WebApp?.initData || "";
-    const res = await api.post("/api/game/start", { stake, initData });
-    setMultiplier(res.data.multiplier);
-    if (res.data.balance !== undefined) {
-      setUser(prev => ({ ...prev, balance: res.data.balance }));
+  const handleShoot = async (angleId) => {
+    if (isShooting || !angleId) return;
+    setIsShooting(true);
+    setChosenAngle(angleId);
+
+    try {
+      const initData = window.Telegram?.WebApp?.initData || "";
+
+      if (multiplier === 1.0 && !canCashout) {
+        try {
+          const startRes = await api.post("/api/game/start", { stake, initData });
+          if (startRes.data.balance !== undefined) {
+            setUser((prev) => ({ ...prev, balance: startRes.data.balance }));
+          }
+        } catch (err) {
+          console.error("Start game error:", err.response?.data || err.message);
+          alert(err.response?.data?.message || "Не вдалось почати гру");
+          setIsShooting(false);
+          return;
+        }
+      }
+
+      const res = await api.post("/api/game/shoot", { angleId, initData });
+      setLastResult(res.data);
+      setMultiplier(res.data.multiplier);
+      setCanCashout(res.data.isGoal);
+    } catch (err) {
+      console.error("Shoot error:", err.response?.data || err.message);
+    } finally {
+      setTimeout(() => setIsShooting(false), 1000);
     }
-  } catch (err) {
-    console.error("Start game error:", err.response?.data || err.message);
-  }
-};
-    startGame();
-  }, [stake, setUser]);
+  };
 
-const handleShoot = async (angleId) => {
-  if (isShooting || !angleId) return;
-  setIsShooting(true);
-  setChosenAngle(angleId);
+  const handleCashout = async () => {
+    try {
+      const initData = window.Telegram?.WebApp?.initData || "";
+      const res = await api.post("/api/game/cashout", { initData });
+      alert(`⭐ Ви забрали ${res.data.winnings} зірок!`);
 
-  try {
-    const initData = window.Telegram?.WebApp?.initData || "";
-    const res = await api.post("/api/game/shoot", { angleId, initData });
-    setLastResult(res.data);
-    setMultiplier(res.data.multiplier);
-    setCanCashout(res.data.isGoal);
-    if (res.data.balance !== undefined) {
-      setUser(prev => ({ ...prev, balance: res.data.balance }));
+      setCanCashout(false);
+      setMultiplier(1.0);
+      setChosenAngle(null);
+      setLastResult(null);
+
+      if (res.data.balance !== undefined) {
+        setUser((prev) => ({ ...prev, balance: res.data.balance }));
+      }
+    } catch (err) {
+      console.error("Cashout error:", err.response?.data || err.message);
+      alert(err.response?.data?.message || "Помилка кешауту");
     }
-  } catch (err) {
-    console.error("Shoot error:", err.response?.data || err.message);
-  } finally {
-    setTimeout(() => setIsShooting(false), 1000);
-  }
-};
-
-const handleCashout = async () => {
-  try {
-    const initData = window.Telegram?.WebApp?.initData || "";
-    const res = await api.post("/api/game/cashout", { initData });
-    alert(`⭐ Ви забрали ${res.data.winnings} зірок!`);
-    setCanCashout(false);
-    setMultiplier(1.0);
-    setChosenAngle(null);
-    setLastResult(null);
-    if (res.data.balance !== undefined) {
-      setUser(prev => ({ ...prev, balance: res.data.balance }));
-    }
-  } catch (err) {
-    console.error("Cashout error:", err.response?.data || err.message);
-  }
-};
-
+  };
 
   const handleRandomShoot = () => {
     const randomAngle = GAME_ANGLES[Math.floor(Math.random() * GAME_ANGLES.length)].id;
+    setChosenAngle(randomAngle);
     handleShoot(randomAngle);
   };
 
@@ -283,23 +285,27 @@ const handleCashout = async () => {
           Множник: <span className={styles.multiplier}>{multiplier.toFixed(2)}x</span>
         </p>
         <p>Ставка: ⭐ {stake}</p>
-        <p>Баланс: ⭐ {user.user?.balance ?? 0}</p>
+        <p>Баланс: ⭐ {user?.balance ?? 0}</p>
       </div>
 
       <div className={styles.field}>
         <div className={styles.goalBackground}>
           <div className={styles.goalFrame}>
-            {GAME_ANGLES.map(angle => (
+            {GAME_ANGLES.map((angle) => (
               <button
                 key={angle.id}
                 ref={hitZoneRefs.current[angle.id]}
-                className={`${styles.hitZone} ${chosenAngle === angle.id ? styles.chosenZone : ''}`}
+                className={`${styles.hitZone} ${chosenAngle === angle.id ? styles.chosenZone : ""}`}
                 style={{ left: angle.x, top: angle.y }}
                 onClick={() => setChosenAngle(angle.id)}
                 disabled={isShooting}
               >
-                {lastResult?.keeperAngleId === angle.id && <span className={styles.saveMark}>✋</span>}
-                {chosenAngle === angle.id && lastResult?.isGoal && <span className={styles.goalMark}>⚽</span>}
+                {lastResult?.keeperAngleId === angle.id && (
+                  <span className={styles.saveMark}>✋</span>
+                )}
+                {chosenAngle === angle.id && lastResult?.isGoal && (
+                  <span className={styles.goalMark}>⚽</span>
+                )}
                 {chosenAngle === angle.id && lastResult && !lastResult.isGoal && (
                   <span className={styles.missMark}>❌</span>
                 )}
@@ -323,9 +329,9 @@ const handleCashout = async () => {
         <input
           type="number"
           value={stake}
-          onChange={e => setStake(Math.max(1, Number(e.target.value)))}
+          onChange={(e) => setStake(Math.max(1, Number(e.target.value)))}
           className={styles.stakeInput}
-          disabled={canCashout || isShooting || multiplier !== 1.0}
+          disabled={isShooting || multiplier !== 1.0}
         />
         <button onClick={handleRandomShoot} className={styles.randomButton} disabled={isShooting}>
           Випадково
@@ -346,14 +352,14 @@ const handleCashout = async () => {
             className={styles.primaryButton}
             disabled={!chosenAngle || isShooting}
           >
-            Ударити
+            {multiplier > 1.0 ? "Наступний удар" : "Ударити"}
           </button>
         )}
       </div>
 
       {lastResult && !isShooting && (
         <p className={lastResult.isGoal ? styles.successMessage : styles.failMessage}>
-          {lastResult.isGoal ? 'ГОЛ! 🎯' : 'ПРОМАХ 😢'}
+          {lastResult.isGoal ? "ГОЛ! 🎯" : "ПРОМАХ 😢"}
         </p>
       )}
     </div>
