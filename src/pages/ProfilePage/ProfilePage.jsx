@@ -86,6 +86,7 @@ const handleDeposit = async () => {
     setMessage("");
 
     try {
+      console.log(selectedAmount)
       const res = await api.post("/api/stars/deposit", { selectedAmount });
       if (!res.data?.success) return setMessage("Failed to create invoice");
 
