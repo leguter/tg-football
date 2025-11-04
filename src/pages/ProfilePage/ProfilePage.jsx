@@ -1,6 +1,7 @@
 import { useState } from "react";
 import axios from "axios";
 import styles from "./ProfilePage.module.css";
+import api from "../../api";
 
 export default function ProfilePage() {
   const [balance, setBalance] = useState(1500);
@@ -21,8 +22,8 @@ export default function ProfilePage() {
   // ==============================
   const handleDeposit = async () => {
     try {
-      const res = await axios.post(
-        "/api/deposit/deposit",
+      const res = await api.post(
+        "/api/stars/deposit",
         { amount: selectedAmount },
         { withCredentials: true } // якщо auth через cookie
       );
@@ -60,8 +61,8 @@ export default function ProfilePage() {
   // ==============================
   const handleWithdraw = async () => {
     try {
-      const res = await axios.post(
-        "/api/deposit/withdraw",
+      const res = await api.post(
+        "/api/stars/withdraw",
         { amount: selectedAmount },
         { withCredentials: true }
       );
