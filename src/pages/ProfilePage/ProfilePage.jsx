@@ -1,5 +1,4 @@
 import { useState } from "react";
-import axios from "axios";
 import styles from "./ProfilePage.module.css";
 import api from "../../api";
 
@@ -13,69 +12,125 @@ export default function ProfilePage() {
   const [showDepositModal, setShowDepositModal] = useState(false);
   const [showWithdrawModal, setShowWithdrawModal] = useState(false);
   const [selectedAmount, setSelectedAmount] = useState(100);
-
+  const [message, setMessage] = useState("");
+  //   const [loading, setLoading] = useState(false);
+  // const [selected, setSelected] = useState(null);
+  // const [balance, setBalance] = useState(0);
   // Вибір можливих сум
   const starOptions = [1, 50, 100, 500, 1000];
 
   // ==============================
   // 💰 Депозит (через бекенд)
   // ==============================
-const handleDeposit = async () => {
-  try {
-    const res = await api.post(
-      "/api/stars/deposit",
-      { amount: selectedAmount },
-      { withCredentials: true }
-    );
+// const handleDeposit = async () => {
+//   try {
+//     const res = await api.post(
+//       "/api/stars/deposit",
+//       { amount: selectedAmount },
+//       { withCredentials: true }
+//     );
 
-    if (res.data.success) {
-      const invoiceLink = res.data.invoice_link;
-      const tg = window.Telegram?.WebApp;
+//     if (res.data.success) {
+//       const invoiceLink = res.data.invoice_link;
+//       const tg = window.Telegram?.WebApp;
 
-      // ✅ Відкриваємо Telegram Invoice меню прямо в Mini App
-      if (tg && tg.openInvoice) {
-        tg.openInvoice(invoiceLink, async (status) => {
-          console.log("🧾 Telegram invoice status:", status);
+//       // ✅ Відкриваємо Telegram Invoice меню прямо в Mini App
+//       if (tg && tg.openInvoice) {
+//         tg.openInvoice(invoiceLink, async (status) => {
+//           console.log("🧾 Telegram invoice status:", status);
 
-          if (status === "paid") {
+//           if (status === "paid") {
+//             try {
+//               const completeRes = await api.post("/api/stars/complete", { amount: selectedAmount });
+//               setBalance(completeRes.data.internal_stars);
+//               alert("✅ Оплата успішна! Баланс оновлено.");
+//             } catch (err) {
+//               console.error("Error after payment:", err);
+//               alert("Помилка при оновленні балансу після оплати!");
+//             }
+//           } else if (status === "failed") {
+//             alert("❌ Оплата не пройшла.");
+//           } else if (status === "cancelled") {
+//             alert("❌ Ви скасували оплату.");
+//           }
+//         });
+//       } else {
+//         // fallback — якщо користувач не в Telegram Mini App
+//         window.open(invoiceLink, "_blank");
+//       }
+
+//       setHistory((prev) => [
+//         {
+//           id: Date.now(),
+//           type: "Deposit",
+//           amount: selectedAmount,
+//           date: new Date().toISOString().slice(0, 10),
+//           multiplier: "-",
+//         },
+//         ...prev,
+//       ]);
+//       setShowDepositModal(false);
+//     } else {
+//       alert("Не вдалося створити депозит!");
+//     }
+//   } catch (err) {
+//     console.error("Deposit error:", err);
+//     alert("Помилка при створенні депозиту!");
+//   }
+// };
+const handleDeposit = async (amount) => {
+
+
+    // setLoading(true);
+    // setSelected(amount);
+    setMessage("");
+
+    try {
+      const res = await api.post("/api/deposit/create_invoice", { amount });
+      if (!res.data?.success) return setMessage("Failed to create invoice");
+
+      const { invoice_link, payload } = res.data;
+      setMessage("💳 We open the payment...");
+
+      if (window.Telegram?.WebApp) {
+        const tg = window.Telegram.WebApp;
+        tg.openInvoice(invoice_link);
+
+        const onInvoiceClosed = async (eventData) => {
+          tg.offEvent("invoiceClosed", onInvoiceClosed);
+
+          if (eventData.status === "paid") {
+            setMessage("✅ Payment is completed. We are checking the server...");
+
             try {
-              const completeRes = await api.post("/api/stars/complete", { amount: selectedAmount });
-              setBalance(completeRes.data.internal_stars);
-              alert("✅ Оплата успішна! Баланс оновлено.");
+              const completeRes = await api.post("/api/deposit/complete", { payload });
+              if (completeRes.data?.success) {
+                setBalance(completeRes.data.balance);
+                setMessage("💰 Balance updated!");
+              } else {
+                setMessage("❌ Payment is not confirmed on the server");
+              }
             } catch (err) {
-              console.error("Error after payment:", err);
-              alert("Помилка при оновленні балансу після оплати!");
+              console.error(err);
+              setMessage("⚠️ It was not possible to restore the balance");
             }
-          } else if (status === "failed") {
-            alert("❌ Оплата не пройшла.");
-          } else if (status === "cancelled") {
-            alert("❌ Ви скасували оплату.");
+          } else {
+            setMessage("❌ Payment declined or not completed");
           }
-        });
-      } else {
-        // fallback — якщо користувач не в Telegram Mini App
-        window.open(invoiceLink, "_blank");
-      }
+        };
 
-      setHistory((prev) => [
-        {
-          id: Date.now(),
-          type: "Deposit",
-          amount: selectedAmount,
-          date: new Date().toISOString().slice(0, 10),
-          multiplier: "-",
-        },
-        ...prev,
-      ]);
-      setShowDepositModal(false);
-    } else {
-      alert("Не вдалося створити депозит!");
+        tg.onEvent("invoiceClosed", onInvoiceClosed);
+      } else {
+        window.open(invoice_link, "_blank");
+        setMessage("Відкрито у новому вікні. Баланс оновиться після підтвердження платежу на сервері.");
+      }
+    } catch (err) {
+      console.error(err);
+      setMessage("Помилка при створенні інвойсу");
+    } finally {
+      // setLoading(false);
     }
-  } catch (err) {
-    console.error("Deposit error:", err);
-    alert("Помилка при створенні депозиту!");
-  }
-};
+  };
 
 
   // ==============================
@@ -244,6 +299,8 @@ const handleDeposit = async () => {
           </div>
         </div>
       )}
+      {message && <p className={styles.Message}>{message}</p>}
     </div>
+    
   );
 }
