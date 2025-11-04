@@ -1,4 +1,3 @@
-/* src/pages/ProfilePage/ProfilePage.module.css */
 .profileContainer {
   padding: 1rem;
 }
@@ -29,6 +28,41 @@
   color: #e4e6eb;
 }
 
+.actions {
+  margin-top: 1rem;
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.depositBtn,
+.withdrawBtn {
+  padding: 0.6rem 1.2rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: 0.2s;
+}
+
+.depositBtn {
+  background-color: #00ffc2;
+  color: #000;
+}
+
+.withdrawBtn {
+  background-color: #ff4d4d;
+  color: #fff;
+}
+
+.depositBtn:hover {
+  background-color: #00e6ac;
+}
+
+.withdrawBtn:hover {
+  background-color: #e63e3e;
+}
+
 .historyTitle {
   color: #e4e6eb;
   border-bottom: 2px solid #33334f;
@@ -51,13 +85,23 @@
 }
 
 .winItem {
-  background-color: #1f3d3d; /* Зеленуватий для перемоги */
+  background-color: #1f3d3d;
   border-left: 5px solid #00ffc2;
 }
 
 .lossItem {
-  background-color: #3d1f1f; /* Червонуватий для програшу */
+  background-color: #3d1f1f;
   border-left: 5px solid #ff4d4d;
+}
+
+.depositItem {
+  background-color: #2d3d1f;
+  border-left: 5px solid #a5ff00;
+}
+
+.withdrawItem {
+  background-color: #3d2d1f;
+  border-left: 5px solid #ffb000;
 }
 
 .type {
@@ -77,8 +121,93 @@
 }
 
 .note {
-    font-size: 0.8rem;
-    margin-top: 1rem;
-    color: #999;
-    text-align: center;
+  font-size: 0.8rem;
+  margin-top: 1rem;
+  color: #999;
+  text-align: center;
+}
+
+/* --- Modal --- */
+.modalBackdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+.modal {
+  background-color: #2b2b3f;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+  text-align: center;
+  width: 90%;
+  max-width: 400px;
+}
+
+.starOptions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: center;
+  margin: 1rem 0;
+}
+
+.starOption {
+  padding: 0.6rem 1rem;
+  background: #444;
+  border: none;
+  border-radius: 8px;
+  color: #fff;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.starOption:hover {
+  background: #555;
+}
+
+.active {
+  background: #00ffc2;
+  color: #000;
+}
+
+.modalActions {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.confirmBtn,
+.cancelBtn {
+  padding: 0.6rem 1.2rem;
+  border: none;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.confirmBtn {
+  background-color: #00ffc2;
+  color: #000;
+}
+
+.cancelBtn {
+  background-color: #999;
+  color: #fff;
+}
+
+.confirmBtn:hover {
+  background-color: #00e6ac;
+}
+
+.cancelBtn:hover {
+  background-color: #777;
 }
