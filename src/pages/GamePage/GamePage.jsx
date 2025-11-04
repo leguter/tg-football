@@ -222,61 +222,44 @@ export default function GamePage({ user, setUser }) {
   }, []);
 
 const handleShoot = async (angleId) => {
-    console.log("handleShoot: Початок. angleId:", angleId);
-
-    if (isShooting || !angleId) {
-      console.log("handleShoot: Вихід (isShooting або немає angleId).");
-      return;
-    }
-
+    if (isShooting || !angleId) return;
     setIsShooting(true);
     setChosenAngle(angleId);
-    console.log("handleShoot: Стани оновлено (isShooting, chosenAngle).");
 
     try {
-      const initData = window.Telegram?.WebApp?.initData || "";
-      console.log("handleShoot: initData отримано:", initData ? "..." : "ПОРОЖНЬО");
-
+      // 🟢 FIX: Ми будемо отримувати initData ДВІЧІ,
+      // по одному разу для кожного запиту, щоб уникнути конфліктів axios.
+      
       if (multiplier === 1.0 && !canCashout) {
-        console.log("handleShoot: Перший удар. Виклик /api/game/start...");
         try {
-          const startRes = await api.post("/api/game/start", { stake, initData });
-          console.log("handleShoot: /api/game/start УСПІХ", startRes.data);
-
+          const initDataForStart = window.Telegram?.WebApp?.initData || "";
+          const startRes = await api.post("/api/game/start", { stake, initData: initDataForStart });
+          
           if (startRes.data.balance !== undefined) {
             setUser((prev) => ({
               ...prev,
               user: { ...prev.user, balance: startRes.data.balance },
             }));
-            console.log("handleShoot: Баланс (після /start) оновлено.");
           }
         } catch (err) {
-          // ❗️ Тут ваша помилка 't is not a function'
-          console.error("handleShoot: ❌ ПОМИЛКА в /api/game/start", err);
-          console.error("handleShoot: Повідомлення помилки:", err.message);
-          console.error("handleShoot: Відповідь сервера (якщо є):", err.response?.data);
+          console.error("Start game error:", err.response?.data || err.message);
           alert(err.response?.data?.message || "Не вдалось почати гру");
           setIsShooting(false);
           return;
         }
       }
 
-      console.log("handleShoot: Виклик /api/game/shoot...");
-      const res = await api.post("/api/game/shoot", { angleId, initData });
-      console.log("handleShoot: /api/game/shoot УСПІХ", res.data);
-
+      // 🟢 FIX: Отримуємо initData вдруге, свіжий, для запиту /shoot
+      const initDataForShoot = window.Telegram?.WebApp?.initData || "";
+      const res = await api.post("/api/game/shoot", { angleId, initData: initDataForShoot });
+      
       setLastResult(res.data);
       setMultiplier(res.data.multiplier);
       setCanCashout(res.data.isGoal);
-      console.log("handleShoot: Стани (після /shoot) оновлено.");
 
     } catch (err) {
-      // Цей блок для помилок /api/game/shoot
-      console.error("handleShoot: ❌ ПОМИЛКА в /api/game/shoot", err);
-      console.error("handleShoot: Повідомлення помилки:", err.message);
-      console.error("handleShoot: Відповідь сервера (якщо є):", err.response?.data);
+      console.error("❌ Shoot error:", err.message, err.response?.data);
     } finally {
-      console.log("handleShoot: 'finally'. Знімаємо isShooting через 1с.");
       setTimeout(() => setIsShooting(false), 1000);
     }
   };
