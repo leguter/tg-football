@@ -11,7 +11,7 @@ export default function ProfilePage() {
 
   const [showDepositModal, setShowDepositModal] = useState(false);
   const [showWithdrawModal, setShowWithdrawModal] = useState(false);
-  const [selectedAmount, setSelectedAmount] = useState(100);
+  const [amount, setSelectedAmount] = useState(100);
   const [message, setMessage] = useState("");
   //   const [loading, setLoading] = useState(false);
   // const [selected, setSelected] = useState(null);
@@ -86,8 +86,7 @@ const handleDeposit = async () => {
     setMessage("");
 
     try {
-      console.log(selectedAmount)
-      const res = await api.post("/api/stars/deposit", { selectedAmount });
+      const res = await api.post("/api/stars/deposit", { amount });
       if (!res.data?.success) return setMessage("Failed to create invoice");
 
       const { invoice_link, payload } = res.data;
@@ -141,7 +140,7 @@ const handleDeposit = async () => {
     try {
       const res = await api.post(
         "/api/stars/withdraw",
-        { amount: selectedAmount },
+        { amount: amount },
         { withCredentials: true }
       );
 
@@ -152,7 +151,7 @@ const handleDeposit = async () => {
           {
             id: Date.now(),
             type: "Withdraw",
-            amount: selectedAmount,
+            amount: amount,
             date: new Date().toISOString().slice(0, 10),
             multiplier: "-",
           },
@@ -246,7 +245,7 @@ const handleDeposit = async () => {
                   key={amount}
                   onClick={() => setSelectedAmount(amount)}
                   className={`${styles.starOption} ${
-                    selectedAmount === amount ? styles.active : ""
+                    amount === amount ? styles.active : ""
                   }`}
                 >
                   ⭐ {amount}
@@ -279,7 +278,7 @@ const handleDeposit = async () => {
                   key={amount}
                   onClick={() => setSelectedAmount(amount)}
                   className={`${styles.starOption} ${
-                    selectedAmount === amount ? styles.active : ""
+                    amount === amount ? styles.active : ""
                   }`}
                 >
                   ⭐ {amount}
