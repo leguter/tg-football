@@ -150,11 +150,8 @@
 // }
 import { useEffect, useState, useRef } from "react";
 import { motion } from "framer-motion";
-import axios from "axios"; // 🟢 FIX: Імпортуємо axios напряму
+import api from "../../api";
 import styles from "./GamePage.module.css";
-
-// 🟢 FIX: Вказуємо URL бекенду тут
-const API_URL = "https://football-back-4jkg.onrender.com";
 
 const GAME_ANGLES = [
   { id: 1, name: "Top Left", x: "25%", y: "35%" },
@@ -164,17 +161,21 @@ const GAME_ANGLES = [
   { id: 5, name: "Bottom Right", x: "77%", y: "67%" },
 ];
 
-// --- Компонент м’яча (без змін) ---
+// --- Компонент м’яча ---
 const Ball = ({ chosenAngle, isShooting, hitZoneRefs, ballContainerRef, lastResult }) => {
   if (!chosenAngle || !isShooting) return null;
+
   const targetRef = hitZoneRefs[chosenAngle];
   if (!targetRef?.current || !ballContainerRef?.current) return null;
+
   const targetRect = targetRef.current.getBoundingClientRect();
-  const fieldRect = ballContainerRef.current.parentElement.getBoundingClientRect();
   const ballRect = ballContainerRef.current.getBoundingClientRect();
+
   const dx = targetRect.left + targetRect.width / 2 - ballRect.left - ballRect.width / 2;
   const dy = targetRect.top + targetRect.height / 2 - ballRect.top - ballRect.height / 2;
+
   const isGoal = lastResult?.isGoal;
+
   return (
     <motion.div
       className={styles.ball}
@@ -203,7 +204,7 @@ const Ball = ({ chosenAngle, isShooting, hitZoneRefs, ballContainerRef, lastResu
   );
 };
 
-// --- Компонент сторінки (з виправленням) ---
+// --- Головний компонент сторінки гри ---
 export default function GamePage({ user, setUser }) {
   const [stake, setStake] = useState(100);
   const [multiplier, setMultiplier] = useState(1.0);
@@ -215,38 +216,25 @@ export default function GamePage({ user, setUser }) {
   const ballContainerRef = useRef(null);
   const hitZoneRefs = useRef({});
 
+  // Ініціалізуємо рефи тільки один раз
   useEffect(() => {
-    GAME_ANGLES.forEach((a) => (hitZoneRefs.current[a.id] = { current: null }));
+    GAME_ANGLES.forEach((angle) => (hitZoneRefs.current[angle.id] = { current: null }));
   }, []);
 
-  // 🟢 FIX: Створюємо функцію для надсилання запитів з потрібними даними
-  const postApi = (endpoint, data) => {
-    const initData = window.Telegram?.WebApp?.initData || "";
-    const tgUser = window.Telegram?.WebApp?.initDataUnsafe?.user;
-    
-    // Передаємо initData в тілі, як очікує ваш бекенд
-    const body = { ...data, initData };
-
-    return axios.post(`${API_URL}${endpoint}`, body, {
-      withCredentials: true, // Для сесій
-      headers: {
-        // Додаємо заголовок, як це робив ваш api.js
-        "x-telegram-user": tgUser ? JSON.stringify(tgUser) : "",
-      },
-    });
-  };
-
+  // --- Основна логіка удару ---
   const handleShoot = async (angleId) => {
     if (isShooting || !angleId) return;
     setIsShooting(true);
     setChosenAngle(angleId);
 
     try {
+      const initData = window.Telegram?.WebApp?.initData || "";
+
+      // Якщо це перший удар — запускаємо гру (списання ставки)
       if (multiplier === 1.0 && !canCashout) {
         try {
-          // 🟢 FIX: Використовуємо нашу нову функцію postApi
-          const startRes = await postApi("/api/game/start", { stake });
-          
+          const startRes = await api.post("/api/game/start", { stake, initData });
+
           if (startRes.data.balance !== undefined) {
             setUser((prev) => ({
               ...prev,
@@ -261,25 +249,25 @@ export default function GamePage({ user, setUser }) {
         }
       }
 
-      // 🟢 FIX: Використовуємо нашу нову функцію postApi
-      const res = await postApi("/api/game/shoot", { angleId });
-      
+      // Тепер робимо удар
+      const res = await api.post("/api/game/shoot", { angleId, initData });
       setLastResult(res.data);
       setMultiplier(res.data.multiplier);
       setCanCashout(res.data.isGoal);
 
     } catch (err) {
-      console.error("❌ Shoot error:", err.response?.data || err.message);
+      console.error("Shoot error:", err.response?.data || err.message);
     } finally {
       setTimeout(() => setIsShooting(false), 1000);
     }
   };
 
+  // --- Кешаут ---
   const handleCashout = async () => {
     try {
-      // 🟢 FIX: Використовуємо нашу нову функцію postApi
-      const res = await postApi("/api/game/cashout", {});
-      
+      const initData = window.Telegram?.WebApp?.initData || "";
+      const res = await api.post("/api/game/cashout", { initData });
+
       alert(`⭐ Ви забрали ${res.data.winnings} зірок!`);
 
       setCanCashout(false);
@@ -299,8 +287,10 @@ export default function GamePage({ user, setUser }) {
     }
   };
 
+  // --- Випадковий удар ---
   const handleRandomShoot = () => {
-    const randomAngle = GAME_ANGLES[Math.floor(Math.random() * GAME_ANGLES.length)].id;
+    const randomAngle =
+      GAME_ANGLES[Math.floor(Math.random() * GAME_ANGLES.length)].id;
     setChosenAngle(randomAngle);
     handleShoot(randomAngle);
   };
@@ -322,7 +312,9 @@ export default function GamePage({ user, setUser }) {
               <button
                 key={angle.id}
                 ref={hitZoneRefs.current[angle.id]}
-                className={`${styles.hitZone} ${chosenAngle === angle.id ? styles.chosenZone : ""}`}
+                className={`${styles.hitZone} ${
+                  chosenAngle === angle.id ? styles.chosenZone : ""
+                }`}
                 style={{ left: angle.x, top: angle.y }}
                 onClick={() => setChosenAngle(angle.id)}
                 disabled={isShooting}
