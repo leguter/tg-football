@@ -22,7 +22,7 @@ export default function ProfilePage() {
   const handleDeposit = async () => {
     try {
       const res = await axios.post(
-        "/api/stars/deposit",
+        "/api/deposit/deposit",
         { amount: selectedAmount },
         { withCredentials: true } // якщо auth через cookie
       );
@@ -61,7 +61,7 @@ export default function ProfilePage() {
   const handleWithdraw = async () => {
     try {
       const res = await axios.post(
-        "/api/stars/withdraw",
+        "/api/deposit/withdraw",
         { amount: selectedAmount },
         { withCredentials: true }
       );
