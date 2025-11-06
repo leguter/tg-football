@@ -17,15 +17,15 @@ const [userData, setUserData] = useState(null);
     tg.ready();
 
     // Функція для реєстрації реферала
-    const registerReferral = async (referrerId) => {
-      try {
-        // Цей запит тепер буде мати правильний 'authToken'
-        await api.post('/api/user/referral/register', { referrerId });
-        console.log('✅ Referral registered successfully!');
-      } catch (err) {
-        console.warn('Referral registration failed (this is often OK):', err.response?.data?.message);
-      }
-    };
+    // const registerReferral = async (referrerId) => {
+    //   try {
+    //     // Цей запит тепер буде мати правильний 'authToken'
+    //     await api.post('/api/user/referral/register', { referrerId });
+    //     console.log('✅ Referral registered successfully!');
+    //   } catch (err) {
+    //     console.warn('Referral registration failed (this is often OK):', err.response?.data?.message);
+    //   }
+    // };
 
     const waitForInitData = async () => {
       let attempts = 0;
@@ -55,19 +55,19 @@ const [userData, setUserData] = useState(null);
         // 2. ❗️ РЕФАКТОРИНГ ЛОГІКИ РЕЄСТРАЦІЇ РЕФЕРАЛА ❗️
         
         // Створюємо об'єкт для роботи з параметрами URL
-        const params = new URLSearchParams(window.location.search);
+        // const params = new URLSearchParams(window.location.search);
         
         // Дістаємо 'referrer_id' з URL (https://...app?referrer_id=12345)
         // Це той 'referrer_id', який ваш bot.py успішно додає!
-        const referrerId = params.get('referrer_id'); 
+        // const referrerId = params.get('referrer_id'); 
   
         // console.log(`Перевірка referrer_id (з URL): ${referrerId || 'НЕ ЗНАЙДЕНО'}`);
   
         // ❗️ Ми більше не перевіряємо ненадійний 'start_param'.
         // Ми перевіряємо 'referrerId' з URL.
-        if (referrerId) {
-          await registerReferral(referrerId);
-        }
+        // if (referrerId) {
+        //   await registerReferral(referrerId);
+        // }
 
         // 3. ВСТАНОВЛЕННЯ ДАНИХ
         setUserData(res.data);
