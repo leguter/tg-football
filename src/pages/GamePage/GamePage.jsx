@@ -215,41 +215,80 @@ export default function GamePage({ user, setUser }) {
   const hitZoneRefs = useRef({});
 
   // ✅ Удар
+  // const handleShoot = async (angleId) => {
+  //   if (isShooting || !angleId) return;
+  //   setIsShooting(true);
+  //   setChosenAngle(angleId);
+
+  //   try {
+  //     const initData =
+  //       window.Telegram?.WebApp?.initData ||
+  //       "?user=" +
+  //         encodeURIComponent(JSON.stringify({ id: user?.user?.telegram_id || 6880150992 }));
+
+  //     // 🟢 Перший удар (списання ставки)
+  //     if (multiplier === 1.0 && !canCashout) {
+  //       const startRes = await api.post("/api/game/start", { stake, initData });
+  //       if (startRes.data.balance !== undefined) {
+  //         setUser((prev) => ({
+  //           ...prev,
+  //           user: { ...prev.user, balance: startRes.data.balance },
+  //         }));
+  //       }
+  //     }
+
+  //     // 🟢 Сам удар
+  //     const res = await api.post("/api/game/shoot", { angleId, initData });
+  //     setLastResult(res.data);
+  //     setMultiplier(res.data.multiplier);
+  //     setCanCashout(res.data.isGoal);
+  //   } catch (err) {
+  //     console.error("Shoot error:", err.response?.data || err.message);
+  //     alert(err.response?.data?.message || "Помилка удару");
+  //   } finally {
+  //     setTimeout(() => setIsShooting(false), 1000);
+  //   }
+  // };
   const handleShoot = async (angleId) => {
     if (isShooting || !angleId) return;
     setIsShooting(true);
     setChosenAngle(angleId);
 
     try {
-      const initData =
-        window.Telegram?.WebApp?.initData ||
-        "?user=" +
-          encodeURIComponent(JSON.stringify({ id: user?.user?.telegram_id || 6880150992 }));
+      const initData = window.Telegram?.WebApp?.initData || "";
 
-      // 🟢 Перший удар (списання ставки)
+      // Якщо це перший удар — запускаємо гру (списання ставки)
       if (multiplier === 1.0 && !canCashout) {
-        const startRes = await api.post("/api/game/start", { stake, initData });
-        if (startRes.data.balance !== undefined) {
-          setUser((prev) => ({
-            ...prev,
-            user: { ...prev.user, balance: startRes.data.balance },
-          }));
+        try {
+          
+          const startRes = await api.post("/api/game/start", { stake, initData });
+
+          if (startRes.data.balance !== undefined) {
+            setUser((prev) => ({
+              ...prev,
+              user: { ...prev.user, balance: startRes.data.balance },
+            }));
+          }
+        } catch (err) {
+          console.error("Start game error:", err.response?.data || err.message);
+          alert(err.response?.data?.message || "Не вдалось почати гру");
+          setIsShooting(false);
+          return;
         }
       }
-
-      // 🟢 Сам удар
+      // Тепер робимо удар
       const res = await api.post("/api/game/shoot", { angleId, initData });
       setLastResult(res.data);
       setMultiplier(res.data.multiplier);
       setCanCashout(res.data.isGoal);
+
     } catch (err) {
+      console.error("❌ Shoot error:", err.response?.data || err.message);
       console.error("Shoot error:", err.response?.data || err.message);
-      alert(err.response?.data?.message || "Помилка удару");
     } finally {
       setTimeout(() => setIsShooting(false), 1000);
     }
   };
-
   // 💰 Кешаут
   const handleCashout = async () => {
     try {
