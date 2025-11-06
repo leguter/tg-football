@@ -148,7 +148,7 @@
 //     </div>
 //   );
 // }
-import { useEffect, useState, useRef } from "react";
+import { useState, useRef } from "react";
 import { motion } from "framer-motion";
 import api from "../../api";
 import styles from "./GamePage.module.css";
@@ -161,19 +161,17 @@ const GAME_ANGLES = [
   { id: 5, name: "Bottom Right", x: "77%", y: "67%" },
 ];
 
-// --- Компонент м’яча ---
-const Ball = ({ chosenAngle, isShooting, hitZoneRefs, ballContainerRef, lastResult }) => {
-  if (!chosenAngle || !isShooting) return null;
+// ⚽ М’яч з анімацією
+function Ball({ chosenAngle, isShooting, hitZoneRefs, ballContainerRef, lastResult }) {
+  if (!isShooting || !chosenAngle) return null;
 
-  const targetRef = hitZoneRefs[chosenAngle];
-  if (!targetRef?.current || !ballContainerRef?.current) return null;
-
-  const targetRect = targetRef.current.getBoundingClientRect();
-  const ballRect = ballContainerRef.current.getBoundingClientRect();
+  const targetRef = hitZoneRefs.current[chosenAngle];
+  const targetRect = targetRef?.getBoundingClientRect();
+  const ballRect = ballContainerRef.current?.getBoundingClientRect();
+  if (!targetRect || !ballRect) return null;
 
   const dx = targetRect.left + targetRect.width / 2 - ballRect.left - ballRect.width / 2;
   const dy = targetRect.top + targetRect.height / 2 - ballRect.top - ballRect.height / 2;
-
   const isGoal = lastResult?.isGoal;
 
   return (
@@ -202,9 +200,9 @@ const Ball = ({ chosenAngle, isShooting, hitZoneRefs, ballContainerRef, lastResu
       <img src="/images/ball1.png" alt="М'яч" className={styles.ballImage} />
     </motion.div>
   );
-};
+}
 
-// --- Головний компонент сторінки гри ---
+// 🎯 Основна сторінка гри
 export default function GamePage({ user, setUser }) {
   const [stake, setStake] = useState(100);
   const [multiplier, setMultiplier] = useState(1.0);
@@ -216,58 +214,51 @@ export default function GamePage({ user, setUser }) {
   const ballContainerRef = useRef(null);
   const hitZoneRefs = useRef({});
 
-  // Ініціалізуємо рефи тільки один раз
-  useEffect(() => {
-    GAME_ANGLES.forEach((angle) => (hitZoneRefs.current[angle.id] = { current: null }));
-  }, []);
-
-  // --- Основна логіка удару ---
+  // ✅ Удар
   const handleShoot = async (angleId) => {
     if (isShooting || !angleId) return;
     setIsShooting(true);
     setChosenAngle(angleId);
 
     try {
-      const initData = window.Telegram?.WebApp?.initData || "";
+      const initData =
+        window.Telegram?.WebApp?.initData ||
+        "?user=" +
+          encodeURIComponent(JSON.stringify({ id: user?.user?.telegram_id || 6880150992 }));
 
-      // Якщо це перший удар — запускаємо гру (списання ставки)
+      // 🟢 Перший удар (списання ставки)
       if (multiplier === 1.0 && !canCashout) {
-        try {
-          const startRes = await api.post("/api/game/start", { stake, initData });
-
-          if (startRes.data.balance !== undefined) {
-            setUser((prev) => ({
-              ...prev,
-              user: { ...prev.user, balance: startRes.data.balance },
-            }));
-          }
-        } catch (err) {
-          console.error("Start game error:", err.response?.data || err.message);
-          alert(err.response?.data?.message || "Не вдалось почати гру");
-          setIsShooting(false);
-          return;
+        const startRes = await api.post("/api/game/start", { stake, initData });
+        if (startRes.data.balance !== undefined) {
+          setUser((prev) => ({
+            ...prev,
+            user: { ...prev.user, balance: startRes.data.balance },
+          }));
         }
       }
 
-      // Тепер робимо удар
+      // 🟢 Сам удар
       const res = await api.post("/api/game/shoot", { angleId, initData });
       setLastResult(res.data);
       setMultiplier(res.data.multiplier);
       setCanCashout(res.data.isGoal);
-
     } catch (err) {
       console.error("Shoot error:", err.response?.data || err.message);
+      alert(err.response?.data?.message || "Помилка удару");
     } finally {
       setTimeout(() => setIsShooting(false), 1000);
     }
   };
 
-  // --- Кешаут ---
+  // 💰 Кешаут
   const handleCashout = async () => {
     try {
-      const initData = window.Telegram?.WebApp?.initData || "";
-      const res = await api.post("/api/game/cashout", { initData });
+      const initData =
+        window.Telegram?.WebApp?.initData ||
+        "?user=" +
+          encodeURIComponent(JSON.stringify({ id: user?.user?.telegram_id || 6880150992 }));
 
+      const res = await api.post("/api/game/cashout", { initData });
       alert(`⭐ Ви забрали ${res.data.winnings} зірок!`);
 
       setCanCashout(false);
@@ -287,11 +278,10 @@ export default function GamePage({ user, setUser }) {
     }
   };
 
-  // --- Випадковий удар ---
+  // 🎲 Випадковий удар
   const handleRandomShoot = () => {
     const randomAngle =
       GAME_ANGLES[Math.floor(Math.random() * GAME_ANGLES.length)].id;
-    setChosenAngle(randomAngle);
     handleShoot(randomAngle);
   };
 
@@ -311,12 +301,12 @@ export default function GamePage({ user, setUser }) {
             {GAME_ANGLES.map((angle) => (
               <button
                 key={angle.id}
-                ref={hitZoneRefs.current[angle.id]}
+                ref={(el) => (hitZoneRefs.current[angle.id] = el)} // ✅ callback-ref
                 className={`${styles.hitZone} ${
                   chosenAngle === angle.id ? styles.chosenZone : ""
                 }`}
                 style={{ left: angle.x, top: angle.y }}
-                onClick={() => setChosenAngle(angle.id)}
+                onClick={() => handleShoot(angle.id)} // ✅ одразу стріляє
                 disabled={isShooting}
               >
                 {lastResult?.keeperAngleId === angle.id && (
@@ -337,7 +327,7 @@ export default function GamePage({ user, setUser }) {
           <Ball
             chosenAngle={chosenAngle}
             isShooting={isShooting}
-            hitZoneRefs={hitZoneRefs.current}
+            hitZoneRefs={hitZoneRefs}
             ballContainerRef={ballContainerRef}
             lastResult={lastResult}
           />
