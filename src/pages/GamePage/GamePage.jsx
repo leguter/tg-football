@@ -306,7 +306,7 @@ export default function GamePage({ user, setUser }) {
                   chosenAngle === angle.id ? styles.chosenZone : ""
                 }`}
                 style={{ left: angle.x, top: angle.y }}
-                onClick={() => handleShoot(angle.id)} // ✅ одразу стріляє
+               onClick={() => setChosenAngle(angle.id)} // ✅ одразу стріляє
                 disabled={isShooting}
               >
                 {lastResult?.keeperAngleId === angle.id && (
