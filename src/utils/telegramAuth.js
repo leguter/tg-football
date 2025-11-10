@@ -9,7 +9,7 @@ export async function loginViaTelegram() {
 
   const userData = tg.initDataUnsafe;
 
-  const res = await axios.post(`${API_URL}/login`, userData);
+  const res = await axios.post(`${API_URL}`, userData);
   localStorage.setItem('token', res.data.token);
   return res.data.token;
 }
