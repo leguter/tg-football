@@ -220,22 +220,22 @@ export default function GamePage({ user, setUser }) {
   //   setIsShooting(true);
   //   setChosenAngle(angleId);
 
-  //   try {
-  //     const initData =
-  //       window.Telegram?.WebApp?.initData ||
-  //       "?user=" +
-  //         encodeURIComponent(JSON.stringify({ id: user?.user?.telegram_id || 6880150992 }));
+    // try {
+    //   const initData =
+    //     window.Telegram?.WebApp?.initData ||
+    //     "?user=" +
+    //       encodeURIComponent(JSON.stringify({ id: user?.user?.telegram_id || 6880150992 }));
 
-  //     // 🟢 Перший удар (списання ставки)
-  //     if (multiplier === 1.0 && !canCashout) {
-  //       const startRes = await api.post("/api/game/start", { stake, initData });
-  //       if (startRes.data.balance !== undefined) {
-  //         setUser((prev) => ({
-  //           ...prev,
-  //           user: { ...prev.user, balance: startRes.data.balance },
-  //         }));
-  //       }
-  //     }
+    //   // 🟢 Перший удар (списання ставки)
+    //   if (multiplier === 1.0 && !canCashout) {
+    //     const startRes = await api.post("/api/game/start", { stake, initData });
+    //     if (startRes.data.balance !== undefined) {
+    //       setUser((prev) => ({
+    //         ...prev,
+    //         user: { ...prev.user, balance: startRes.data.balance },
+    //       }));
+    //     }
+    //   }
 
   //     // 🟢 Сам удар
   //     const res = await api.post("/api/game/shoot", { angleId, initData });
