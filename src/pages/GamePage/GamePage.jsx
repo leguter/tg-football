@@ -312,7 +312,11 @@ export default function GamePage({ user, setUser }) {
           }));
         }
       }
-  
+      console.log("---- SHOOT REQUEST ----");
+      console.log("angleId:", angleId);
+      console.log("initData:", initData?.slice(0, 100)); // щоб не спамити весь рядок
+      console.log("-----------------------");
+      
       // 🟢 Сам удар
       const res = await api.post("/api/game/shoot", { angleId, initData });
       setLastResult(res.data);
