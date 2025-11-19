@@ -304,6 +304,7 @@ export default function GamePage({ user, setUser }) {
   
       // 🟢 Перший удар — старт гри
       if (multiplier === 1.0 && !canCashout) {
+        console.log(initData)
         const startRes = await api.post("/api/game/start", { stake, initData });
         if (startRes.data.balance !== undefined) {
           setUser((prev) => ({
