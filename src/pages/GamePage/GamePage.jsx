@@ -306,6 +306,7 @@ export default function GamePage({ user, setUser }) {
       if (multiplier === 1.0 && !canCashout) {
         try {
             console.log(initData)
+            
           const startRes = await api.post("/api/game/start", { stake, initData });
         
           if (startRes.data.balance !== undefined) {
