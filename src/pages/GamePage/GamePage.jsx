@@ -304,21 +304,25 @@ export default function GamePage({ user, setUser }) {
   
       // 🟢 Перший удар — старт гри
       if (multiplier === 1.0 && !canCashout) {
-        console.log(initData)
-        const startRes = await api.post("/api/game/start", { stake, initData });
-        if (startRes.data.balance !== undefined) {
-          setUser((prev) => ({
-            ...prev,
-            user: { ...prev.user, balance: startRes.data.balance },
-          }));
+        try {
+            console.log(initData)
+          const startRes = await api.post("/api/game/start", { stake, initData });
+        
+          if (startRes.data.balance !== undefined) {
+            setUser((prev) => ({
+              ...prev,
+              user: { ...prev.user, balance: startRes.data.balance },
+            }));
+          }
+        } catch (err) {
+          console.error("Start game error:", err.response?.data || err.message);
+          alert(err.response?.data?.message || "Не вдалось почати гру");
+          setIsShooting(false);
+          return;
         }
       }
-      console.log("---- SHOOT REQUEST ----");
-      console.log("angleId:", angleId);
-      console.log("initData:", initData?.slice(0, 100)); // щоб не спамити весь рядок
-      console.log("-----------------------");
-      
-      // 🟢 Сам удар
+
+      // Тепер робимо удар
       const res = await api.post("/api/game/shoot", { angleId, initData });
       setLastResult(res.data);
       setMultiplier(res.data.multiplier);
