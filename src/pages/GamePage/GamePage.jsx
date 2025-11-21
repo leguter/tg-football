@@ -4,11 +4,11 @@ import api from "../../api";
 import styles from "./GamePage.module.css";
 
 const GAME_ANGLES = [
-  { id: 1, x: "25%", y: "35%" },
-  { id: 2, x: "52%", y: "32%" },
-  { id: 3, x: "77%", y: "35%" },
-  { id: 4, x: "25%", y: "67%" },
-  { id: 5, x: "77%", y: "67%" },
+  { id: 1, name: "Top Left", x: "25%", y: "35%" },
+  { id: 2, name: "Top Center", x: "52%", y: "32%" },
+  { id: 3, name: "Top Right", x: "77%", y: "35%" },
+  { id: 4, name: "Bottom Left", x: "25%", y: "67%" },
+  { id: 5, name: "Bottom Right", x: "77%", y: "67%" },
 ];
 
 function getInitData(user) {
@@ -16,21 +16,19 @@ function getInitData(user) {
   if (tgData && tgData.trim() !== "") return tgData;
 
   if (user?.user?.telegram_id) {
-    return (
-      "?user=" +
-      encodeURIComponent(JSON.stringify({ id: user.user.telegram_id }))
-    );
+    return "?user=" +
+      encodeURIComponent(JSON.stringify({ id: user.user.telegram_id }));
   }
+
   return "";
 }
 
-function Ball({ isShooting, chosenAngle, hitZoneRefs, ballContainerRef, onFinish, lastResult }) {
+function Ball({ chosenAngle, isShooting, hitZoneRefs, ballContainerRef, onFinish }) {
   if (!isShooting || !chosenAngle) return null;
 
   const targetRef = hitZoneRefs.current[chosenAngle];
-  const ballRect = ballContainerRef.current?.getBoundingClientRect();
   const targetRect = targetRef?.getBoundingClientRect();
-
+  const ballRect = ballContainerRef.current?.getBoundingClientRect();
   if (!targetRect || !ballRect) return null;
 
   const dx =
@@ -44,21 +42,9 @@ function Ball({ isShooting, chosenAngle, hitZoneRefs, ballContainerRef, onFinish
       initial={{ x: 0, y: 0 }}
       animate={{ x: dx, y: dy, rotate: 360 }}
       transition={{ duration: 0.8 }}
-      onAnimationComplete={() => {
-        if (!lastResult?.isGoal) {
-          ballContainerRef.current?.animate(
-            [
-              { transform: "translateY(0px)" },
-              { transform: "translateY(-25px)" },
-              { transform: "translateY(0px)" },
-            ],
-            { duration: 400 }
-          );
-        }
-        onFinish();
-      }}
+      onAnimationComplete={onFinish}
     >
-      <img src="/images/ball1.png" alt="Мяч" className={styles.ballImage} />
+      <img src="/images/ball1.png" alt="М'яч" className={styles.ballImage} />
     </motion.div>
   );
 }
@@ -66,86 +52,74 @@ function Ball({ isShooting, chosenAngle, hitZoneRefs, ballContainerRef, onFinish
 export default function GamePage({ user, setUser }) {
   const [stake, setStake] = useState(100);
   const [multiplier, setMultiplier] = useState(1.0);
-  const [pendingResult, setPendingResult] = useState(null);
-  const [endingResult, setEndingResult] = useState(null);
   const [chosenAngle, setChosenAngle] = useState(null);
+  const [lastResult, setLastResult] = useState(null);
   const [isShooting, setIsShooting] = useState(false);
-  const [controlsBlocked, setControlsBlocked] = useState(false);
+  const [canCashout, setCanCashout] = useState(false);
+  const [showResult, setShowResult] = useState(false);
 
   const ballContainerRef = useRef(null);
   const hitZoneRefs = useRef({});
 
   const handleShoot = async (angleId) => {
-    if (!angleId || controlsBlocked) return;
+    if (!angleId || isShooting) return;
 
-    setChosenAngle(angleId);
+    setShowResult(false);
     setIsShooting(true);
-    setControlsBlocked(true);
-    setEndingResult(null);
+    setChosenAngle(angleId);
 
     const initData = getInitData(user);
+
+    if (multiplier === 1.0 && !canCashout) {
+      try {
+        const startRes = await api.post("/api/game/start", { initData, stake });
+        if (startRes.data?.balance !== undefined) {
+          setUser((prev) => ({
+            ...prev,
+            user: { ...prev.user, balance: startRes.data.balance },
+          }));
+        }
+      } catch {
+        setIsShooting(false);
+        alert("Не вдалось почати гру");
+        return;
+      }
+    }
 
     try {
-      if (multiplier === 1.0 && !pendingResult) {
-        const startRes = await api.post("/api/game/start", { initData, stake });
-        setUser((prev) => ({
-          ...prev,
-          user: { ...prev.user, balance: startRes.data.balance },
-        }));
-      }
-
       const res = await api.post("/api/game/shoot", { initData, angleId });
-      setPendingResult(res.data);
+      setLastResult(res.data);
       setMultiplier(res.data.multiplier);
-    } catch (err) {
-      alert(err.response?.data?.message || "Помилка удару");
-      reset();
+      setCanCashout(res.data.isGoal);
+    } catch {
+      alert("Помилка удару");
     }
   };
 
-  const finishAnimation = () => {
-    if (!pendingResult) return reset();
-
-    setEndingResult(pendingResult);
-    setIsShooting(false);
-
-    if (!pendingResult.isGoal) {
-      setMultiplier(1.0);
-      setPendingResult(null);
-    }
-
-    setControlsBlocked(false);
+  const handleRandomShoot = () => {
+    const random = GAME_ANGLES[Math.floor(Math.random() * GAME_ANGLES.length)].id;
+    handleShoot(random);
   };
 
-  const cashout = async () => {
+  const handleCashout = async () => {
     const initData = getInitData(user);
-
     try {
       const res = await api.post("/api/game/cashout", { initData });
-      alert(`⭐ Ви забрали ${res.data.winnings}`);
-
+      alert(`⭐ +${res.data.winnings}`);
       setUser((prev) => ({
         ...prev,
         user: { ...prev.user, balance: res.data.balance },
       }));
 
-      reset();
-    } catch (err) {
+      setCanCashout(false);
+      setMultiplier(1.0);
+      setChosenAngle(null);
+      setLastResult(null);
+      setShowResult(false);
+    } catch {
       alert("Помилка кешауту");
     }
   };
-
-  const reset = () => {
-    setIsShooting(false);
-    setControlsBlocked(false);
-    setChosenAngle(null);
-    setPendingResult(null);
-    setEndingResult(null);
-    setMultiplier(1.0);
-  };
-
-  const randomShoot = () =>
-    handleShoot(GAME_ANGLES[Math.floor(Math.random() * GAME_ANGLES.length)].id);
 
   return (
     <div className={styles.gameContainer}>
@@ -158,22 +132,24 @@ export default function GamePage({ user, setUser }) {
       <div className={styles.field}>
         <div className={styles.goalBackground}>
           <div className={styles.goalFrame}>
-            {GAME_ANGLES.map(({ id, x, y }) => (
+            {GAME_ANGLES.map((angle) => (
               <button
-                key={id}
-                ref={(el) => (hitZoneRefs.current[id] = el)}
-                className={`${styles.hitZone} ${chosenAngle === id ? styles.chosenZone : ""}`}
-                style={{ left: x, top: y }}
-                onClick={() => setChosenAngle(id)}
-                disabled={controlsBlocked}
+                key={angle.id}
+                ref={(el) => (hitZoneRefs.current[angle.id] = el)}
+                className={`${styles.hitZone} ${chosenAngle === angle.id ? styles.chosenZone : ""}`}
+                style={{ left: angle.x, top: angle.y }}
+                onClick={() => setChosenAngle(angle.id)}
+                disabled={isShooting}
               >
-                {endingResult?.keeperAngleId === id && <span className={styles.saveMark}>✋</span>}
-                {endingResult?.chosenAngleId === id &&
-                  (endingResult?.isGoal ? (
-                    <span className={styles.goalMark}>⚽</span>
-                  ) : (
-                    <span className={styles.missMark}>❌</span>
-                  ))}
+                {showResult && lastResult?.keeperAngleId === angle.id && (
+                  <span className={styles.saveMark}>✋</span>
+                )}
+                {showResult && chosenAngle === angle.id && lastResult?.isGoal && (
+                  <span className={styles.goalMark}>⚽</span>
+                )}
+                {showResult && chosenAngle === angle.id && lastResult && !lastResult.isGoal && (
+                  <span className={styles.missMark}>❌</span>
+                )}
               </button>
             ))}
           </div>
@@ -185,8 +161,10 @@ export default function GamePage({ user, setUser }) {
             isShooting={isShooting}
             hitZoneRefs={hitZoneRefs}
             ballContainerRef={ballContainerRef}
-            lastResult={pendingResult}
-            onFinish={finishAnimation}
+            onFinish={() => {
+              setIsShooting(false);
+              setShowResult(true);
+            }}
           />
         </div>
       </div>
@@ -195,35 +173,35 @@ export default function GamePage({ user, setUser }) {
         <input
           type="number"
           value={stake}
-          onChange={(e) => setStake(Math.max(1, +e.target.value))}
+          onChange={(e) => setStake(Math.max(1, Number(e.target.value)))}
           className={styles.stakeInput}
-          disabled={controlsBlocked || multiplier !== 1.0}
+          disabled={canCashout || isShooting || multiplier !== 1.0}
         />
 
-        <button onClick={randomShoot} disabled={controlsBlocked}>Випадково</button>
+        <button onClick={handleRandomShoot} className={styles.randomButton} disabled={isShooting}>
+          Випадково
+        </button>
 
-        {pendingResult ? (
+        {canCashout ? (
           <>
-            <button onClick={() => handleShoot(chosenAngle)} disabled={controlsBlocked}>
-              Наступний удар
-            </button>
-            <button onClick={cashout} disabled={controlsBlocked}>
+            <button onClick={handleCashout} className={styles.cashoutButton}>
               Забрати ⭐ {Math.floor(stake * multiplier)}
+            </button>
+            <button onClick={() => handleShoot(chosenAngle)} className={styles.shootButton}>
+              Наступний удар
             </button>
           </>
         ) : (
-          <button
-            onClick={() => handleShoot(chosenAngle)}
-            disabled={!chosenAngle || controlsBlocked}
-          >
+          <button onClick={() => handleShoot(chosenAngle)} className={styles.primaryButton}
+            disabled={!chosenAngle || isShooting}>
             Ударити
           </button>
         )}
       </div>
 
-      {endingResult && !isShooting && (
-        <p className={endingResult.isGoal ? styles.successMessage : styles.failMessage}>
-          {endingResult.isGoal ? "ГОЛ! 🎯" : "ПРОМАХ 😢"}
+      {showResult && lastResult && !isShooting && (
+        <p className={lastResult.isGoal ? styles.successMessage : styles.failMessage}>
+          {lastResult.isGoal ? "ГОЛ! 🎯" : "ПРОМАХ 😢"}
         </p>
       )}
     </div>
