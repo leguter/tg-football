@@ -11,10 +11,9 @@ const GAME_ANGLES = [
   { id: 5, name: "Bottom Right", x: "77%", y: "67%" },
 ];
 
-// === Отримуємо initData з Telegram (або фейковий для локалу) ===
 function getInitData(user) {
   const tgData = window.Telegram?.WebApp?.initData;
-  if (tgData && tgData.trim() !== "") return tgData;
+  if (tgData?.trim()) return tgData;
 
   if (user?.user?.telegram_id) {
     return (
@@ -26,8 +25,21 @@ function getInitData(user) {
   return "";
 }
 
-// === М'яч з анімацією ===
-function Ball({ chosenAngle, isShooting, hitZoneRefs, ballContainerRef, lastResult }) {
+// ⚽ Ball with post-animation logic
+function Ball({
+  chosenAngle,
+  isShooting,
+  hitZoneRefs,
+  ballContainerRef,
+  pendingResult,
+  setPendingResult,
+  setLastResult,
+  setMultiplier,
+  setCanCashout,
+  setIsShooting,
+  setGoalShake,
+  setKeeperDir,
+}) {
   if (!isShooting || !chosenAngle) return null;
 
   const targetRef = hitZoneRefs.current[chosenAngle];
@@ -35,125 +47,129 @@ function Ball({ chosenAngle, isShooting, hitZoneRefs, ballContainerRef, lastResu
   const ballRect = ballContainerRef.current?.getBoundingClientRect();
   if (!targetRect || !ballRect) return null;
 
-  const dx =
-    targetRect.left +
-    targetRect.width / 2 -
-    ballRect.left -
-    ballRect.width / 2;
-  const dy =
-    targetRect.top +
-    targetRect.height / 2 -
-    ballRect.top -
-    ballRect.height / 2;
+  const dx = targetRect.left + targetRect.width / 2 - ballRect.left - ballRect.width / 2;
+  const dy = targetRect.top + targetRect.height / 2 - ballRect.top - ballRect.height / 2;
+
+  const speed = 0.6 + Math.random() * 0.4; // randomized speed
 
   return (
     <motion.div
       className={styles.ball}
-      initial={{ x: 0, y: 0, scale: 1 }}
-      animate={{ x: dx, y: dy, rotate: 360, transition: { duration: 0.8 } }}
+      initial={{ x: 0, y: 0 }}
+      animate={{
+        x: dx,
+        y: dy,
+        rotate: 360,
+        transition: { duration: speed },
+      }}
+      onAnimationComplete={() => {
+        if (!pendingResult) return;
+
+        const { isGoal, multiplier } = pendingResult;
+
+        setLastResult(pendingResult);
+        setMultiplier(multiplier);
+        setCanCashout(isGoal);
+
+        if (isGoal) setGoalShake(true);
+        else setKeeperDir(chosenAngle);
+
+        setTimeout(() => {
+          setGoalShake(false);
+          setKeeperDir(null);
+        }, 800);
+
+        setPendingResult(null);
+        setIsShooting(false);
+      }}
     >
       <img src="/images/ball1.png" alt="М'яч" className={styles.ballImage} />
     </motion.div>
   );
 }
 
-// === Сторінка гри (СТАРИЙ ВИГЛЯД, НОВА ЛОГІКА) ===
 export default function GamePage({ user, setUser }) {
   const [stake, setStake] = useState(100);
   const [multiplier, setMultiplier] = useState(1.0);
   const [chosenAngle, setChosenAngle] = useState(null);
   const [lastResult, setLastResult] = useState(null);
+  const [pendingResult, setPendingResult] = useState(null);
   const [isShooting, setIsShooting] = useState(false);
   const [canCashout, setCanCashout] = useState(false);
+  const [goalShake, setGoalShake] = useState(false);
+  const [keeperDir, setKeeperDir] = useState(null);
 
   const ballContainerRef = useRef(null);
   const hitZoneRefs = useRef({});
 
-  // === Удар ===
   const handleShoot = async (angleId) => {
     if (!angleId || isShooting) return;
-
     setIsShooting(true);
     setChosenAngle(angleId);
 
     const initData = getInitData(user);
 
-    // 1) Перший удар → старт гри (списання ставки)
     if (multiplier === 1.0 && !canCashout) {
       try {
         const startRes = await api.post("/api/game/start", { initData, stake });
-
-        // оновлюємо баланс тільки якщо є setUser
         if (typeof setUser === "function" && startRes.data?.balance !== undefined) {
           setUser((prev) => ({
             ...prev,
             user: { ...prev.user, balance: startRes.data.balance },
           }));
         }
-      } catch (err) {
-        console.error("Start game error:", err);
-        alert(err?.response?.data?.message || "Не вдалось почати гру");
+      } catch {
+        alert("Не вдалось почати гру");
         setIsShooting(false);
         return;
       }
     }
 
-    // 2) Сам удар
     try {
       const res = await api.post("/api/game/shoot", { initData, angleId });
-      setLastResult(res.data);
-      setMultiplier(res.data.multiplier);
-      setCanCashout(res.data.isGoal);
-    } catch (err) {
-      console.error("Shoot error:", err);
-      alert(err?.response?.data?.message || "Помилка удару");
+      setPendingResult(res.data);
+    } catch {
+      alert("Помилка удару");
+      setIsShooting(false);
     }
-
-    setTimeout(() => setIsShooting(false), 800);
   };
 
-  // === Випадковий удар (кнопка "Випадково") ===
   const handleRandomShoot = () => {
     const randomAngle = GAME_ANGLES[Math.floor(Math.random() * GAME_ANGLES.length)].id;
     handleShoot(randomAngle);
   };
 
-  // === Кешаут ===
   const handleCashout = async () => {
     const initData = getInitData(user);
     try {
       const res = await api.post("/api/game/cashout", { initData });
       alert(`⭐ Ви забрали ${res.data.winnings} зірок!`);
-
       if (typeof setUser === "function" && res.data?.balance !== undefined) {
         setUser((prev) => ({
           ...prev,
           user: { ...prev.user, balance: res.data.balance },
         }));
       }
-
       setCanCashout(false);
       setMultiplier(1.0);
       setChosenAngle(null);
       setLastResult(null);
-    } catch (err) {
-      console.error("Cashout error:", err);
-      alert(err?.response?.data?.message || "Помилка кешауту");
+    } catch {
+      alert("Помилка кешауту");
     }
   };
 
   return (
     <div className={styles.gameContainer}>
+      {/* Info bar */}
       <div className={styles.infoBar}>
-        <p>
-          Множник:{" "}
-          <span className={styles.multiplier}>{multiplier.toFixed(2)}x</span>
-        </p>
+        <p>Множник: <span className={styles.multiplier}>{multiplier.toFixed(2)}x</span></p>
         <p>Ставка: ⭐ {stake}</p>
         <p>Баланс: ⭐ {user?.user?.balance ?? 0}</p>
       </div>
 
-      <div className={styles.field}>
+      {/* Field */}
+      <div className={`${styles.field} ${goalShake ? styles.shake : ""}`}>
         <div className={styles.goalBackground}>
           <div className={styles.goalFrame}>
             {GAME_ANGLES.map((angle) => (
@@ -166,32 +182,43 @@ export default function GamePage({ user, setUser }) {
                 style={{ left: angle.x, top: angle.y }}
                 onClick={() => setChosenAngle(angle.id)}
                 disabled={isShooting}
-              >
-                {lastResult?.keeperAngleId === angle.id && (
-                  <span className={styles.saveMark}>✋</span>
-                )}
-                {chosenAngle === angle.id && lastResult?.isGoal && (
-                  <span className={styles.goalMark}>⚽</span>
-                )}
-                {chosenAngle === angle.id && lastResult && !lastResult.isGoal && (
-                  <span className={styles.missMark}>❌</span>
-                )}
-              </button>
+              />
             ))}
+
+            {/* Goalie animation */}
+            {keeperDir && (
+              <motion.div
+                className={styles.keeper}
+                initial={{ x: 0 }}
+                animate={{
+                  x: keeperDir === 1 || keeperDir === 4 ? -50 :
+                     keeperDir === 3 || keeperDir === 5 ? 50 : 0,
+                }}
+                transition={{ duration: 0.4 }}
+              />
+            )}
           </div>
         </div>
 
-        <div className={styles.ballContainer} ref={ballContainerRef}>
+        <div ref={ballContainerRef} className={styles.ballContainer}>
           <Ball
             chosenAngle={chosenAngle}
             isShooting={isShooting}
             hitZoneRefs={hitZoneRefs}
             ballContainerRef={ballContainerRef}
-            lastResult={lastResult}
+            pendingResult={pendingResult}
+            setPendingResult={setPendingResult}
+            setLastResult={setLastResult}
+            setMultiplier={setMultiplier}
+            setCanCashout={setCanCashout}
+            setIsShooting={setIsShooting}
+            setGoalShake={setGoalShake}
+            setKeeperDir={setKeeperDir}
           />
         </div>
       </div>
 
+      {/* Controls */}
       <div className={styles.controls}>
         <input
           type="number"
@@ -200,44 +227,28 @@ export default function GamePage({ user, setUser }) {
           className={styles.stakeInput}
           disabled={canCashout || isShooting || multiplier !== 1.0}
         />
-
-        <button
-          onClick={handleRandomShoot}
-          className={styles.randomButton}
-          disabled={isShooting}
-        >
+        <button onClick={handleRandomShoot} className={styles.randomButton} disabled={isShooting}>
           Випадково
         </button>
-
         {canCashout ? (
           <>
-            <button onClick={handleCashout} className={styles.cashoutButton}>
+            <button className={styles.cashoutButton} onClick={handleCashout}>
               Забрати ⭐ {Math.floor(stake * multiplier)}
             </button>
-            <button
-              onClick={() => handleShoot(chosenAngle)}
-              className={styles.shootButton}
-            >
+            <button className={styles.shootButton} onClick={() => handleShoot(chosenAngle)}>
               Наступний удар
             </button>
           </>
         ) : (
-          <button
-            onClick={() => handleShoot(chosenAngle)}
-            className={styles.primaryButton}
-            disabled={!chosenAngle || isShooting}
-          >
+          <button className={styles.primaryButton} onClick={() => handleShoot(chosenAngle)} disabled={!chosenAngle || isShooting}>
             Ударити
           </button>
         )}
       </div>
 
+      {/* Result */}
       {lastResult && !isShooting && (
-        <p
-          className={
-            lastResult.isGoal ? styles.successMessage : styles.failMessage
-          }
-        >
+        <p className={lastResult.isGoal ? styles.successMessage : styles.failMessage}>
           {lastResult.isGoal ? "ГОЛ! 🎯" : "ПРОМАХ 😢"}
         </p>
       )}
