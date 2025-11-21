@@ -259,23 +259,18 @@ const GAME_ANGLES = [
   { id: 5, name: "Bottom Right", x: "77%", y: "67%" },
 ];
 
-// === Отримуємо initData з Telegram (або фейковий для локалу) ===
 function getInitData(user) {
   const tgData = window.Telegram?.WebApp?.initData;
   if (tgData && tgData.trim() !== "") return tgData;
 
   if (user?.user?.telegram_id) {
-    return (
-      "?user=" +
-      encodeURIComponent(JSON.stringify({ id: user.user.telegram_id }))
-    );
+    return "?user=" + encodeURIComponent(JSON.stringify({ id: user.user.telegram_id }));
   }
 
   return "";
 }
 
-// === М'яч з анімацією ===
-function Ball({ chosenAngle, isShooting, hitZoneRefs, ballContainerRef, pendingResult, setPendingResult, setLastResult, setMultiplier, setCanCashout, setIsShooting }) {
+function Ball({ chosenAngle, isShooting, hitZoneRefs, ballContainerRef }) {
   if (!isShooting || !chosenAngle) return null;
 
   const targetRef = hitZoneRefs.current[chosenAngle];
@@ -289,29 +284,14 @@ function Ball({ chosenAngle, isShooting, hitZoneRefs, ballContainerRef, pendingR
   return (
     <motion.div
       className={styles.ball}
-      initial={{ x: 0, y: 0 }}
+      initial={{ x: 0, y: 0, scale: 1 }}
       animate={{ x: dx, y: dy, rotate: 360, transition: { duration: 0.8 } }}
-      onAnimationComplete={() => {
-        if (!pendingResult) return;
-
-        // 🟢 Тільки тепер показуємо результат
-        setLastResult(pendingResult);
-        setMultiplier(pendingResult.multiplier);
-        setCanCashout(pendingResult.isGoal);
-        setPendingResult(null);
-
-        setTimeout(() => {
-          setIsShooting(false);
-        }, 200);
-      }}
     >
-      <img src="/images/ball1.png" className={styles.ballImage} alt="ball" />
+      <img src="/images/ball1.png" alt="М'яч" className={styles.ballImage} />
     </motion.div>
   );
 }
 
-
-// === Сторінка гри (СТАРИЙ ВИГЛЯД, НОВА ЛОГІКА) ===
 export default function GamePage({ user, setUser }) {
   const [stake, setStake] = useState(100);
   const [multiplier, setMultiplier] = useState(1.0);
@@ -319,53 +299,56 @@ export default function GamePage({ user, setUser }) {
   const [lastResult, setLastResult] = useState(null);
   const [isShooting, setIsShooting] = useState(false);
   const [canCashout, setCanCashout] = useState(false);
+  const [showResult, setShowResult] = useState(false);
 
   const ballContainerRef = useRef(null);
   const hitZoneRefs = useRef({});
 
-  // === Удар ===
- const [pendingResult, setPendingResult] = useState(null);
+  const handleShoot = async (angleId) => {
+    if (!angleId || isShooting) return;
 
-const handleShoot = async (angleId) => {
-  if (isShooting || !angleId) return;
-  setIsShooting(true);
-  setChosenAngle(angleId);
+    setIsShooting(true);
+    setChosenAngle(angleId);
+    setShowResult(false);
 
-  const initData = getInitData(user);
+    const initData = getInitData(user);
 
-  if (multiplier === 1.0 && !canCashout) {
-    try {
-      const startRes = await api.post("/api/game/start", { stake, initData });
-      if (typeof setUser === "function" && startRes.data.balance !== undefined) {
-        setUser((prev) => ({
-          ...prev,
-          user: { ...prev.user, balance: startRes.data.balance },
-        }));
+    if (multiplier === 1.0 && !canCashout) {
+      try {
+        const startRes = await api.post("/api/game/start", { initData, stake });
+        if (typeof setUser === "function" && startRes.data?.balance !== undefined) {
+          setUser((prev) => ({
+            ...prev,
+            user: { ...prev.user, balance: startRes.data.balance },
+          }));
+        }
+      } catch (err) {
+        alert(err?.response?.data?.message || "Не вдалось почати гру");
+        setIsShooting(false);
+        return;
       }
-    } catch {
-      alert("Не вдалось почати гру");
-      setIsShooting(false);
-      return;
     }
-  }
 
-  try {
-    const res = await api.post("/api/game/shoot", { angleId, initData });
-    setPendingResult(res.data); // 🟡 записуємо, але не показуємо одразу
-  } catch {
-    alert("Помилка удару");
-    setIsShooting(false);
-  }
-};
+    try {
+      const res = await api.post("/api/game/shoot", { initData, angleId });
+      setLastResult(res.data);
+      setMultiplier(res.data.multiplier);
+      setCanCashout(res.data.isGoal);
+    } catch (err) {
+      alert(err?.response?.data?.message || "Помилка удару");
+    }
 
+    setTimeout(() => {
+      setIsShooting(false);
+      setShowResult(true);
+    }, 800);
+  };
 
-  // === Випадковий удар (кнопка "Випадково") ===
   const handleRandomShoot = () => {
     const randomAngle = GAME_ANGLES[Math.floor(Math.random() * GAME_ANGLES.length)].id;
     handleShoot(randomAngle);
   };
 
-  // === Кешаут ===
   const handleCashout = async () => {
     const initData = getInitData(user);
     try {
@@ -383,8 +366,8 @@ const handleShoot = async (angleId) => {
       setMultiplier(1.0);
       setChosenAngle(null);
       setLastResult(null);
+      setShowResult(false);
     } catch (err) {
-      console.error("Cashout error:", err);
       alert(err?.response?.data?.message || "Помилка кешауту");
     }
   };
@@ -392,10 +375,7 @@ const handleShoot = async (angleId) => {
   return (
     <div className={styles.gameContainer}>
       <div className={styles.infoBar}>
-        <p>
-          Множник:{" "}
-          <span className={styles.multiplier}>{multiplier.toFixed(2)}x</span>
-        </p>
+        <p>Множник: <span className={styles.multiplier}>{multiplier.toFixed(2)}x</span></p>
         <p>Ставка: ⭐ {stake}</p>
         <p>Баланс: ⭐ {user?.user?.balance ?? 0}</p>
       </div>
@@ -407,20 +387,18 @@ const handleShoot = async (angleId) => {
               <button
                 key={angle.id}
                 ref={(el) => (hitZoneRefs.current[angle.id] = el)}
-                className={`${styles.hitZone} ${
-                  chosenAngle === angle.id ? styles.chosenZone : ""
-                }`}
+                className={`${styles.hitZone} ${chosenAngle === angle.id ? styles.chosenZone : ""}`}
                 style={{ left: angle.x, top: angle.y }}
                 onClick={() => setChosenAngle(angle.id)}
                 disabled={isShooting}
               >
-                {lastResult?.keeperAngleId === angle.id && (
+                {showResult && lastResult?.keeperAngleId === angle.id && (
                   <span className={styles.saveMark}>✋</span>
                 )}
-                {chosenAngle === angle.id && lastResult?.isGoal && (
+                {showResult && chosenAngle === angle.id && lastResult?.isGoal && (
                   <span className={styles.goalMark}>⚽</span>
                 )}
-                {chosenAngle === angle.id && lastResult && !lastResult.isGoal && (
+                {showResult && chosenAngle === angle.id && lastResult && !lastResult.isGoal && (
                   <span className={styles.missMark}>❌</span>
                 )}
               </button>
@@ -429,19 +407,13 @@ const handleShoot = async (angleId) => {
         </div>
 
         <div className={styles.ballContainer} ref={ballContainerRef}>
-         <Ball
-  chosenAngle={chosenAngle}
-  isShooting={isShooting}
-  hitZoneRefs={hitZoneRefs}
-  ballContainerRef={ballContainerRef}
-  pendingResult={pendingResult}
-  setPendingResult={setPendingResult}
-  setLastResult={setLastResult}
-  setMultiplier={setMultiplier}
-  setCanCashout={setCanCashout}
-  setIsShooting={setIsShooting}
-/>
-
+          <Ball
+            chosenAngle={chosenAngle}
+            isShooting={isShooting}
+            hitZoneRefs={hitZoneRefs}
+            ballContainerRef={ballContainerRef}
+            lastResult={lastResult}
+          />
         </div>
       </div>
 
@@ -454,11 +426,7 @@ const handleShoot = async (angleId) => {
           disabled={canCashout || isShooting || multiplier !== 1.0}
         />
 
-        <button
-          onClick={handleRandomShoot}
-          className={styles.randomButton}
-          disabled={isShooting}
-        >
+        <button onClick={handleRandomShoot} className={styles.randomButton} disabled={isShooting}>
           Випадково
         </button>
 
@@ -467,10 +435,7 @@ const handleShoot = async (angleId) => {
             <button onClick={handleCashout} className={styles.cashoutButton}>
               Забрати ⭐ {Math.floor(stake * multiplier)}
             </button>
-            <button
-              onClick={() => handleShoot(chosenAngle)}
-              className={styles.shootButton}
-            >
+            <button onClick={() => handleShoot(chosenAngle)} className={styles.shootButton}>
               Наступний удар
             </button>
           </>
@@ -485,12 +450,8 @@ const handleShoot = async (angleId) => {
         )}
       </div>
 
-      {lastResult && !isShooting && (
-        <p
-          className={
-            lastResult.isGoal ? styles.successMessage : styles.failMessage
-          }
-        >
+      {showResult && lastResult && !isShooting && (
+        <p className={lastResult.isGoal ? styles.successMessage : styles.failMessage}>
           {lastResult.isGoal ? "ГОЛ! 🎯" : "ПРОМАХ 😢"}
         </p>
       )}
