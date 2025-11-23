@@ -4,11 +4,11 @@
 // import styles from "./GamePage.module.css";
 
 // const GAME_ANGLES = [
-//   { id: 1, name: "Top Left", x: "25%", y: "35%" },
-//   { id: 2, name: "Top Center", x: "52%", y: "32%" },
-//   { id: 3, name: "Top Right", x: "77%", y: "35%" },
-//   { id: 4, name: "Bottom Left", x: "25%", y: "67%" },
-//   { id: 5, name: "Bottom Right", x: "77%", y: "67%" },
+  // { id: 1, name: "Top Left", x: "25%", y: "35%" },
+  // { id: 2, name: "Top Center", x: "52%", y: "32%" },
+  // { id: 3, name: "Top Right", x: "77%", y: "35%" },
+  // { id: 4, name: "Bottom Left", x: "25%", y: "67%" },
+  // { id: 5, name: "Bottom Right", x: "77%", y: "67%" },
 // ];
 
 // // === Отримуємо initData з Telegram (або фейковий для локалу) ===
@@ -252,7 +252,7 @@ import api from "../../api";
 import styles from "./GamePage.module.css";
 
 const GAME_ANGLES = [
-  { id: 1, name: "Top Left", x: "25%", y: "35%" },
+  { id: 1, name: "Top Left", x: "-10%", y: "35%" },
   { id: 2, name: "Top Center", x: "52%", y: "32%" },
   { id: 3, name: "Top Right", x: "77%", y: "35%" },
   { id: 4, name: "Bottom Left", x: "25%", y: "67%" },
