@@ -105,7 +105,7 @@ const [userData, setUserData] = useState(null);
         <Route path="/" element={<Layout />}>
           <Route index element={<HomePage />} />
           <Route path="game" element={<GamePage user={userData} />} />
-          <Route path="profile" element={<ProfilePage />} />
+          <Route path="profile" element={<ProfilePage user={userData} />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Route>
       </Routes>
