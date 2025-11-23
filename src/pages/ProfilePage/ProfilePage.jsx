@@ -1,15 +1,19 @@
-import { useState } from "react";
+import { useState,useEffect } from "react";
 import styles from "./ProfilePage.module.css";
 import api from "../../api";
 
-export default function ProfilePage(user) {
+export default function ProfilePage({user}) {
   const [balance, setBalance] = useState(1500);
   const [history, setHistory] = useState([
     { id: 1, type: "Win", amount: 350, date: "2025-10-30", multiplier: "x1.4" },
     { id: 2, type: "Loss", amount: 100, date: "2025-10-30", multiplier: "x1.0" },
   ]);
   // console.log(user)
-  setBalance(user.user.balance)
+  useEffect(() => {
+    if (user?.user?.balance !== undefined) {
+      setBalance(user.user.balance);
+    }
+  }, [user]);
   const [showDepositModal, setShowDepositModal] = useState(false);
   const [showWithdrawModal, setShowWithdrawModal] = useState(false);
   const [amount, setSelectedAmount] = useState(100);
