@@ -256,7 +256,7 @@ const GAME_ANGLES = [
   { id: 2, name: "Top Center", x: "51%", y: "37%" },
   { id: 3, name: "Top Right", x: "92%", y: "37%" },
   { id: 4, name: "Bottom Left", x: "10%", y: "65%" },
-  { id: 5, name: "Bottom Right", x: "77%", y: "67%" },
+  { id: 5, name: "Bottom Right", x: "92%", y: "65%" },
 ];
 
 function getInitData(user) {
