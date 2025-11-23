@@ -379,8 +379,19 @@ export default function GamePage({ user, setUser }) {
         <p>Ставка: ⭐ {stake}</p>
         <p>Баланс: ⭐ {user?.user?.balance ?? 0}</p>
       </div>
-
+       
       <div className={styles.field}>
+        {multiplier > 1.0 && (
+  <motion.div
+    className={styles.multiplierDisplay}
+    initial={{ opacity: 0, scale: 0.7 }}
+    animate={{ opacity: 1, scale: 1 }}
+    transition={{ duration: 0.3 }}
+  >
+    {multiplier.toFixed(2)}x 🔥
+  </motion.div>
+)}
+
         <div className={styles.goalBackground}>
           <div className={styles.goalFrame}>
             {GAME_ANGLES.map((angle) => (
