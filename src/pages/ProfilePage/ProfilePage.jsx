@@ -8,7 +8,7 @@ export default function ProfilePage(user) {
     { id: 1, type: "Win", amount: 350, date: "2025-10-30", multiplier: "x1.4" },
     { id: 2, type: "Loss", amount: 100, date: "2025-10-30", multiplier: "x1.0" },
   ]);
-  console.log(user)
+  // console.log(user)
   setBalance(user.user.balance)
   const [showDepositModal, setShowDepositModal] = useState(false);
   const [showWithdrawModal, setShowWithdrawModal] = useState(false);
