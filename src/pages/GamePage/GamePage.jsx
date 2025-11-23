@@ -253,7 +253,7 @@ import styles from "./GamePage.module.css";
 
 const GAME_ANGLES = [
   { id: 1, name: "Top Left", x: "10%", y: "37%" },
-  { id: 2, name: "Top Center", x: "52%", y: "32%" },
+  { id: 2, name: "Top Center", x: "50%", y: "37%" },
   { id: 3, name: "Top Right", x: "77%", y: "35%" },
   { id: 4, name: "Bottom Left", x: "10%", y: "65%" },
   { id: 5, name: "Bottom Right", x: "77%", y: "67%" },
