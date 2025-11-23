@@ -415,6 +415,15 @@ export default function GamePage({ user, setUser }) {
             lastResult={lastResult}
           />
         </div>
+          {showResult && lastResult && !isShooting && (
+    <div
+      className={`${styles.shotResult} ${
+        lastResult.isGoal ? styles.goal : styles.miss
+      }`}
+    >
+      {lastResult.isGoal ? "ГОЛ! 🎯" : "ПРОМАХ 😢"}
+    </div>
+  )}
       </div>
 
       <div className={styles.controls}>
@@ -450,11 +459,11 @@ export default function GamePage({ user, setUser }) {
         )}
       </div>
 
-      {showResult && lastResult && !isShooting && (
+      {/* {showResult && lastResult && !isShooting && (
         <p className={lastResult.isGoal ? styles.successMessage : styles.failMessage}>
           {lastResult.isGoal ? "ГОЛ! 🎯" : "ПРОМАХ 😢"}
         </p>
-      )}
+      )} */}
     </div>
   );
 }
