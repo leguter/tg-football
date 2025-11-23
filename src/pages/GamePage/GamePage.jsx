@@ -246,7 +246,7 @@
 // }
 
 
-import { useState, useRef } from "react";
+import { useState, useRef,useEffect } from "react";
 import { motion } from "framer-motion";
 import api from "../../api";
 import styles from "./GamePage.module.css";
@@ -303,6 +303,10 @@ export default function GamePage({ user, setUser }) {
 
   const ballContainerRef = useRef(null);
   const hitZoneRefs = useRef({});
+// Після обробки кешауту або старту гри
+useEffect(() => {
+  // викликає rerender при зміні балансу
+}, [user?.user?.balance]);
 
   const handleShoot = async (angleId) => {
     if (!angleId || isShooting) return;
