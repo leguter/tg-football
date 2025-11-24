@@ -401,3 +401,54 @@
   filter: grayscale(0.5);
   cursor: not-allowed;
 }
+/* === 🟣 Інформаційна панель зверху === */
+.infoBar {
+  display: flex;
+  justify-content: space-between;
+  width: 90%;
+  max-width: 420px;
+
+  padding: 10px 14px;
+  border-radius: 14px;
+
+  background: rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(6px);
+
+  box-shadow: 0 0 14px rgba(0,255,194,0.25),
+              inset 0 0 8px rgba(255,255,255,0.08);
+
+  color: #e3e3e3;
+  font-size: 1rem;
+  font-weight: 600;
+
+  text-align: center;
+}
+
+/* Окремий блок */
+.infoBar p {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Множник */
+.multiplier {
+  color: #00ff95;
+  font-weight: 700;
+  text-shadow: 0 0 6px rgba(0,255,149,0.6);
+}
+
+/* ⭐ Іконки */
+.infoBarStar {
+  font-size: 1.1rem;
+  filter: drop-shadow(0 0 4px rgba(255,255,100,0.6));
+}
+
+/* ✨ Адаптивність */
+@media (max-width: 380px) {
+  .infoBar {
+    font-size: 0.85rem;
+    padding: 8px 10px;
+  }
+}

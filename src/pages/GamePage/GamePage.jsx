@@ -379,10 +379,19 @@ useEffect(() => {
   return (
     <div className={styles.gameContainer}>
       <div className={styles.infoBar}>
-        <p>Множник: <span className={styles.multiplier}>{multiplier.toFixed(2)}x</span></p>
-        <p>Ставка: ⭐ {stake}</p>
-        <p>Баланс: ⭐ {user?.user?.balance ?? 0}</p>
-      </div>
+  <p>
+    Множник: <span className={styles.multiplier}>{multiplier.toFixed(2)}x</span>
+  </p>
+
+  <p>
+    Ставка: <span className={styles.infoBarStar}>⭐</span> {stake}
+  </p>
+
+  <p>
+    Баланс: <span className={styles.infoBarStar}>⭐</span> {user?.user?.balance ?? 0}
+  </p>
+</div>
+
        
       <div className={styles.field}>
         {multiplier > 1.0 && (
