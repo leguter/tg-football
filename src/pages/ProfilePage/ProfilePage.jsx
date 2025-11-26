@@ -173,7 +173,7 @@ const handleDeposit = async () => {
 
   return (
     <div className={styles.profileContainer}>
-      <h1>👤 Ваш Профіль</h1>
+      <h1>👤 Ваш Профиль</h1>
 
       <div className={styles.balanceCard}>
         <h2>Баланс:</h2>
@@ -190,7 +190,7 @@ const handleDeposit = async () => {
             onClick={() => setShowWithdrawModal(true)}
             className={styles.withdrawBtn}
           >
-            Вивід
+            Вывод
           </button>
         </div>
       </div>
@@ -212,12 +212,12 @@ const handleDeposit = async () => {
           >
             <span className={styles.type}>
               {item.type === "Win"
-                ? "✅ ВИГРАШ"
+                ? "✅ ВЫИГРАШ"
                 : item.type === "Loss"
-                ? "❌ ПРОГРАШ"
+                ? "❌ ПРОИГРАШ"
                 : item.type === "Deposit"
                 ? "💰 ДЕПОЗИТ"
-                : "💸 ВИВІД"}
+                : "💸 ВИВОД"}
             </span>
             <span className={styles.details}>
               {item.type === "Win"
@@ -227,23 +227,18 @@ const handleDeposit = async () => {
                 : item.type === "Deposit"
                 ? `+${item.amount}`
                 : `-${item.amount}`}{" "}
-              зірок
+              звезд
             </span>
             <span className={styles.date}>{item.date}</span>
           </li>
         ))}
       </ul>
 
-      <p className={styles.note}>
-        Примітка: Логіка автентифікації користувача Telegram повинна бути
-        реалізована в App.jsx.
-      </p>
-
       {/* --- Deposit Modal --- */}
       {showDepositModal && (
         <div className={styles.modalBackdrop}>
           <div className={styles.modal}>
-            <h3>💰 Оберіть суму для депозиту</h3>
+            <h3>💰 Выберите сумму для депозита</h3>
             <div className={styles.starOptions}>
               {starOptions.map((amount) => (
                 <button
@@ -259,13 +254,13 @@ const handleDeposit = async () => {
             </div>
             <div className={styles.modalActions}>
               <button onClick={handleDeposit} className={styles.confirmBtn}>
-                Підтвердити
+                Подтвердить
               </button>
               <button
                 onClick={() => setShowDepositModal(false)}
                 className={styles.cancelBtn}
               >
-                Скасувати
+                Отменить
               </button>
             </div>
           </div>
@@ -276,7 +271,7 @@ const handleDeposit = async () => {
       {showWithdrawModal && (
         <div className={styles.modalBackdrop}>
           <div className={styles.modal}>
-            <h3>💸 Оберіть суму для виводу</h3>
+            <h3>💸 Выберите сумму для вывода</h3>
             <div className={styles.starOptions}>
               {starOptions.map((amount) => (
                 <button
@@ -292,13 +287,13 @@ const handleDeposit = async () => {
             </div>
             <div className={styles.modalActions}>
               <button onClick={handleWithdraw} className={styles.confirmBtn}>
-                Підтвердити
+                Подтвердить
               </button>
               <button
                 onClick={() => setShowWithdrawModal(false)}
                 className={styles.cancelBtn}
               >
-                Скасувати
+                Отменить
               </button>
             </div>
           </div>

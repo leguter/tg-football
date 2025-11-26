@@ -10,10 +10,10 @@ export default function Header() {
           🏠 Home
         </NavLink>
         <NavLink to="/game" className={({ isActive }) => (isActive ? styles.active : styles.link)}>
-          ⚽ Грати
+          ⚽ Играть
         </NavLink>
         <NavLink to="/profile" className={({ isActive }) => (isActive ? styles.active : styles.link)}>
-          👤 Профіль
+          👤 Профиль
         </NavLink>
       </nav>
     </header>

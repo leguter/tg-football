@@ -380,7 +380,7 @@ useEffect(() => {
     <div className={styles.gameContainer}>
       <div className={styles.infoBar}>
   <p>
-    Множник: <span className={styles.multiplier}>{multiplier.toFixed(2)}x</span>
+    Умножитель: <span className={styles.multiplier}>{multiplier.toFixed(2)}x</span>
   </p>
 
   <p>
@@ -466,10 +466,10 @@ useEffect(() => {
         {canCashout ? (
           <>
             <button onClick={handleCashout} className={styles.cashoutButton}>
-              Забрати ⭐ {Math.floor(stake * multiplier)}
+              Забрать ⭐ {Math.floor(stake * multiplier)}
             </button>
             <button onClick={() => handleShoot(chosenAngle)} className={styles.shootButton}>
-              Наступний удар
+              Следующий удар
             </button>
           </>
         ) : (
@@ -478,7 +478,7 @@ useEffect(() => {
             className={styles.primaryButton}
             disabled={!chosenAngle || isShooting}
           >
-            Ударити
+            Ударить
           </button>
         )}
       </div>
