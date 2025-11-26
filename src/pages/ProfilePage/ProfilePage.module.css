@@ -1,138 +1,393 @@
-.profileContainer {
-  padding: 1.5rem;
-  min-height: 100vh;
-  background: radial-gradient(circle, #0a0f1a 40%, #000) fixed;
+/* .profileContainer {
+  padding: 1rem;
 }
 
 .profileContainer h1 {
   text-align: center;
-  color: #00ffc8;
-  font-size: 2.1rem;
-  margin-bottom: 1.5rem;
-  text-shadow: 0 0 10px #00ffc8;
+  color: #00ffc2;
+  margin-bottom: 2rem;
 }
 
 .balanceCard {
-  background: linear-gradient(135deg, #182032, #101626);
-  padding: 1.7rem;
-  border-radius: 16px;
+  background-color: #33334f;
+  padding: 1.5rem;
+  border-radius: 10px;
   text-align: center;
-  border: 2px solid rgba(0, 255, 200, 0.25);
-  box-shadow: 0 0 20px rgba(0, 255, 200, 0.1);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+  margin-bottom: 2rem;
+}
+
+.balanceCard h2 {
+  color: #f7a072;
+  margin-bottom: 0.5rem;
 }
 
 .balanceAmount {
-  font-size: 3rem;
-  font-weight: 800;
-  color: #ffe770;
-  text-shadow: 0 0 15px #ffea6d;
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: #e4e6eb;
 }
 
 .actions {
+  margin-top: 1rem;
   display: flex;
   justify-content: center;
   gap: 1rem;
-  margin-top: 1.2rem;
 }
 
 .depositBtn,
 .withdrawBtn {
-  padding: 0.7rem 1.4rem;
-  border-radius: 10px;
-  font-size: 1.1rem;
+  padding: 0.6rem 1.2rem;
   border: none;
+  border-radius: 8px;
   cursor: pointer;
   font-weight: bold;
-  transition: 0.15s;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
+  transition: 0.2s;
 }
 
 .depositBtn {
-  background: #00ff57;
+  background-color: #00ffc2;
   color: #000;
-  box-shadow: 0 0 10px rgba(0, 255, 87, 0.4);
-}
-
-.depositBtn:hover {
-  transform: scale(1.05);
-  box-shadow: 0 0 14px rgba(0, 255, 87, 0.7);
 }
 
 .withdrawBtn {
-  background: #ff3b3b;
+  background-color: #ff4d4d;
   color: #fff;
-  box-shadow: 0 0 10px rgba(255, 59, 59, 0.4);
+}
+
+.depositBtn:hover {
+  background-color: #00e6ac;
 }
 
 .withdrawBtn:hover {
-  transform: scale(1.05);
-  box-shadow: 0 0 14px rgba(255, 59, 59, 0.7);
+  background-color: #e63e3e;
 }
 
 .historyTitle {
-  margin-top: 2rem;
-  color: #cfd8e6;
-  border-bottom: 2px solid rgba(255,255,255,0.1);
+  color: #e4e6eb;
+  border-bottom: 2px solid #33334f;
+  padding-bottom: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.historyList {
+  list-style: none;
+  padding: 0;
 }
 
 .historyList li {
   display: flex;
   justify-content: space-between;
-  background: #121826;
-  padding: 0.85rem;
-  border-radius: 8px;
-  margin: 0.45rem 0;
-  align-items: center;
+  padding: 0.75rem 0.5rem;
+  margin-bottom: 0.5rem;
+  border-radius: 5px;
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.2);
 }
 
 .winItem {
-  border-left: 6px solid #00ff57;
+  background-color: #1f3d3d;
+  border-left: 5px solid #00ffc2;
 }
 
 .lossItem {
-  border-left: 6px solid #ff3b3b;
+  background-color: #3d1f1f;
+  border-left: 5px solid #ff4d4d;
 }
 
 .depositItem {
-  border-left: 6px solid #3bc7ff;
+  background-color: #2d3d1f;
+  border-left: 5px solid #a5ff00;
 }
 
 .withdrawItem {
-  border-left: 6px solid #ffaa00;
+  background-color: #3d2d1f;
+  border-left: 5px solid #ffb000;
 }
 
 .type {
   font-weight: bold;
-  font-size: 1rem;
+  flex: 1;
 }
 
 .details {
-  font-size: 1rem;
+  flex: 2;
+  text-align: right;
 }
 
 .date {
-  font-size: 0.9rem;
+  flex: 1;
+  text-align: right;
   opacity: 0.7;
 }
 
-/* Modal */
+.note {
+  font-size: 0.8rem;
+  margin-top: 1rem;
+  color: #999;
+  text-align: center;
+}
+
 .modalBackdrop {
-  background: rgba(0, 0, 0, 0.85);
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
 }
 
 .modal {
-  background: #11182c;
-  border: 2px solid rgba(0, 255, 200, 0.4);
-  box-shadow: 0 0 25px rgba(0,255,200,0.2);
+  background-color: #2b2b3f;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+  text-align: center;
+  width: 90%;
+  max-width: 400px;
+}
+
+.starOptions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: center;
+  margin: 1rem 0;
 }
 
 .starOption {
-  background: #1a2237;
-  border: 1px solid #00ffc2;
+  padding: 0.6rem 1rem;
+  background: #444;
+  border: none;
+  border-radius: 8px;
+  color: #fff;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.starOption:hover {
+  background: #555;
 }
 
 .active {
   background: #00ffc2;
   color: #000;
+}
+
+.modalActions {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.confirmBtn,
+.cancelBtn {
+  padding: 0.6rem 1.2rem;
+  border: none;
+  border-radius: 8px;
   font-weight: bold;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.confirmBtn {
+  background-color: #00ffc2;
+  color: #000;
+}
+
+.cancelBtn {
+  background-color: #999;
+  color: #fff;
+}
+
+.confirmBtn:hover {
+  background-color: #00e6ac;
+}
+
+.cancelBtn:hover {
+  background-color: #777;
+} */
+
+
+
+
+
+
+
+
+
+
+
+
+.profileContainer {
+  width: 100%;
+  max-width: 360px; /* ✔ Нормальная ширина для Telegram */
+  margin: 0 auto;
+  padding: 1rem 0.7rem;
+  text-align: center;
+}
+
+.profileContainer h1 {
+  color: #00ffc8;
+  font-size: 1.7rem;
+  font-weight: 700;
+  text-shadow: 0 0 10px rgba(0, 255, 200, 0.7);
+  margin-bottom: 1rem;
+}
+
+/* ==== Баланс карточка ==== */
+.balanceCard {
+  background: #101822;
+  padding: 1.3rem;
+  border-radius: 14px;
+  border: 2px solid rgba(0, 255, 200, 0.25);
+  box-shadow: 0 0 15px rgba(0, 255, 200, 0.15);
+  margin: 0 auto 1.5rem;
+  width: 100%;
+}
+
+.balanceCard h2 {
+  color: #bcd1e8;
+  font-size: 1.1rem;
+  margin-bottom: 0.6rem;
+}
+
+.balanceAmount {
+  font-size: 2.8rem;
+  font-weight: 900;
+  color: #ffe770;
+  margin: 0.6rem 0;
+  text-shadow: 0 0 15px #ffea6d;
+}
+
+.actions {
+  margin-top: 0.7rem;
+  display: flex;
+  justify-content: space-around;
+}
+
+/* ==== Buttons ==== */
+.depositBtn,
+.withdrawBtn {
+  padding: 0.55rem 1.2rem;
+  font-size: 1rem;
+  border-radius: 8px;
+  font-weight: bold;
+  border: none;
+  cursor: pointer;
+  transition: 0.15s;
+}
+
+.depositBtn {
+  background: #00ff57;
+  color: #000;
+}
+
+.withdrawBtn {
+  background: #ff3b3b;
+  color: #fff;
+}
+
+.depositBtn:hover,
+.withdrawBtn:hover {
+  transform: scale(1.06);
+}
+
+/* ==== History ==== */
+.historyTitle {
+  text-align: left;
+  font-size: 1.2rem;
+  margin: 1rem 0 0.3rem;
+  color: #d6e2ff;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  padding-bottom: 0.3rem;
+}
+
+.historyList {
+  width: 100%;
+  padding: 0;
+  margin: 0;
+}
+
+.historyList li {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  background: #151e2b;
+  padding: 0.7rem;
+  border-radius: 8px;
+  margin-bottom: 0.6rem;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  align-items: center;
+}
+
+.winItem {
+  border-left: 5px solid #00ff57;
+}
+
+.lossItem {
+  border-left: 5px solid #ff3b3b;
+}
+
+.type {
+  font-weight: bold;
+  text-align: left;
+}
+
+.details {
+  text-align: right;
+}
+
+.date {
+  grid-column: span 2;
+  font-size: 0.75rem;
+  opacity: 0.6;
+  text-align: right;
+}
+.modalBackdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+.modal {
+  background-color: #2b2b3f;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+  text-align: center;
+  width: 90%;
+  max-width: 400px;
+}
+
+.starOptions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: center;
+  margin: 1rem 0;
+}
+
+.starOption {
+  padding: 0.6rem 1rem;
+  background: #444;
+  border: none;
+  border-radius: 8px;
+  color: #fff;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.starOption:hover {
+  background: #555;
 }
