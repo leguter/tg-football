@@ -1,213 +1,138 @@
 .profileContainer {
-  padding: 1rem;
+  padding: 1.5rem;
+  min-height: 100vh;
+  background: radial-gradient(circle, #0a0f1a 40%, #000) fixed;
 }
 
 .profileContainer h1 {
   text-align: center;
-  color: #00ffc2;
-  margin-bottom: 2rem;
+  color: #00ffc8;
+  font-size: 2.1rem;
+  margin-bottom: 1.5rem;
+  text-shadow: 0 0 10px #00ffc8;
 }
 
 .balanceCard {
-  background-color: #33334f;
-  padding: 1.5rem;
-  border-radius: 10px;
+  background: linear-gradient(135deg, #182032, #101626);
+  padding: 1.7rem;
+  border-radius: 16px;
   text-align: center;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
-  margin-bottom: 2rem;
-}
-
-.balanceCard h2 {
-  color: #f7a072;
-  margin-bottom: 0.5rem;
+  border: 2px solid rgba(0, 255, 200, 0.25);
+  box-shadow: 0 0 20px rgba(0, 255, 200, 0.1);
 }
 
 .balanceAmount {
-  font-size: 2.5rem;
-  font-weight: bold;
-  color: #e4e6eb;
+  font-size: 3rem;
+  font-weight: 800;
+  color: #ffe770;
+  text-shadow: 0 0 15px #ffea6d;
 }
 
 .actions {
-  margin-top: 1rem;
   display: flex;
   justify-content: center;
   gap: 1rem;
+  margin-top: 1.2rem;
 }
 
 .depositBtn,
 .withdrawBtn {
-  padding: 0.6rem 1.2rem;
+  padding: 0.7rem 1.4rem;
+  border-radius: 10px;
+  font-size: 1.1rem;
   border: none;
-  border-radius: 8px;
   cursor: pointer;
   font-weight: bold;
-  transition: 0.2s;
+  transition: 0.15s;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
 }
 
 .depositBtn {
-  background-color: #00ffc2;
+  background: #00ff57;
   color: #000;
-}
-
-.withdrawBtn {
-  background-color: #ff4d4d;
-  color: #fff;
+  box-shadow: 0 0 10px rgba(0, 255, 87, 0.4);
 }
 
 .depositBtn:hover {
-  background-color: #00e6ac;
+  transform: scale(1.05);
+  box-shadow: 0 0 14px rgba(0, 255, 87, 0.7);
+}
+
+.withdrawBtn {
+  background: #ff3b3b;
+  color: #fff;
+  box-shadow: 0 0 10px rgba(255, 59, 59, 0.4);
 }
 
 .withdrawBtn:hover {
-  background-color: #e63e3e;
+  transform: scale(1.05);
+  box-shadow: 0 0 14px rgba(255, 59, 59, 0.7);
 }
 
 .historyTitle {
-  color: #e4e6eb;
-  border-bottom: 2px solid #33334f;
-  padding-bottom: 0.5rem;
-  margin-bottom: 1rem;
-}
-
-.historyList {
-  list-style: none;
-  padding: 0;
+  margin-top: 2rem;
+  color: #cfd8e6;
+  border-bottom: 2px solid rgba(255,255,255,0.1);
 }
 
 .historyList li {
   display: flex;
   justify-content: space-between;
-  padding: 0.75rem 0.5rem;
-  margin-bottom: 0.5rem;
-  border-radius: 5px;
-  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.2);
+  background: #121826;
+  padding: 0.85rem;
+  border-radius: 8px;
+  margin: 0.45rem 0;
+  align-items: center;
 }
 
 .winItem {
-  background-color: #1f3d3d;
-  border-left: 5px solid #00ffc2;
+  border-left: 6px solid #00ff57;
 }
 
 .lossItem {
-  background-color: #3d1f1f;
-  border-left: 5px solid #ff4d4d;
+  border-left: 6px solid #ff3b3b;
 }
 
 .depositItem {
-  background-color: #2d3d1f;
-  border-left: 5px solid #a5ff00;
+  border-left: 6px solid #3bc7ff;
 }
 
 .withdrawItem {
-  background-color: #3d2d1f;
-  border-left: 5px solid #ffb000;
+  border-left: 6px solid #ffaa00;
 }
 
 .type {
   font-weight: bold;
-  flex: 1;
+  font-size: 1rem;
 }
 
 .details {
-  flex: 2;
-  text-align: right;
+  font-size: 1rem;
 }
 
 .date {
-  flex: 1;
-  text-align: right;
+  font-size: 0.9rem;
   opacity: 0.7;
 }
 
-.note {
-  font-size: 0.8rem;
-  margin-top: 1rem;
-  color: #999;
-  text-align: center;
-}
-
-/* --- Modal --- */
+/* Modal */
 .modalBackdrop {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.7);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 100;
+  background: rgba(0, 0, 0, 0.85);
 }
 
 .modal {
-  background-color: #2b2b3f;
-  padding: 2rem;
-  border-radius: 12px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
-  text-align: center;
-  width: 90%;
-  max-width: 400px;
-}
-
-.starOptions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  justify-content: center;
-  margin: 1rem 0;
+  background: #11182c;
+  border: 2px solid rgba(0, 255, 200, 0.4);
+  box-shadow: 0 0 25px rgba(0,255,200,0.2);
 }
 
 .starOption {
-  padding: 0.6rem 1rem;
-  background: #444;
-  border: none;
-  border-radius: 8px;
-  color: #fff;
-  cursor: pointer;
-  transition: 0.2s;
-}
-
-.starOption:hover {
-  background: #555;
+  background: #1a2237;
+  border: 1px solid #00ffc2;
 }
 
 .active {
   background: #00ffc2;
   color: #000;
-}
-
-.modalActions {
-  display: flex;
-  justify-content: center;
-  gap: 1rem;
-}
-
-.confirmBtn,
-.cancelBtn {
-  padding: 0.6rem 1.2rem;
-  border: none;
-  border-radius: 8px;
   font-weight: bold;
-  cursor: pointer;
-  transition: 0.2s;
-}
-
-.confirmBtn {
-  background-color: #00ffc2;
-  color: #000;
-}
-
-.cancelBtn {
-  background-color: #999;
-  color: #fff;
-}
-
-.confirmBtn:hover {
-  background-color: #00e6ac;
-}
-
-.cancelBtn:hover {
-  background-color: #777;
 }
