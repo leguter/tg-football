@@ -1,7 +1,5 @@
 import { useNavigate } from "react-router-dom";
 import styles from "./HomePage.module.css";
-// import ballIcon from "../../../public/images/ball.jpg"; // добавь иконку мяча
-// import starIcon from "../../assets/star_big.png";
 
 export default function HomePage({ user }) {
   const navigate = useNavigate();
@@ -9,12 +7,11 @@ export default function HomePage({ user }) {
   return (
     <div className={styles.container}>
       <div className={styles.heroSection}>
-        <div className={styles.ball}></div>
         <h1 className={styles.title}>
-          Football <span>Stars!</span>
+          Football <span>Stars! ⭐</span>
         </h1>
         <p className={styles.subtitle}>
-          Покажи свою точность ⚽ Забей пенальти — забери звезды ⭐
+          Перевір свою точність ⚽ Забий пенальті — забери зірки!
         </p>
       </div>
 
@@ -25,17 +22,17 @@ export default function HomePage({ user }) {
       )}
 
       <div className={styles.rulesCard}>
-        <h2>📌 Как играть?</h2>
+        <h2>📌 Як грати?</h2>
         <ul>
-          <li>⚽ Выбирай направление удара</li>
-          <li>🥅 Вратарь угадывает случайно</li>
-          <li>💎 Каждый гол умножает выигрыш</li>
-          <li>🔥 Риск или выводишь звезды!</li>
+          <li>⚽ Обираєш напрям удару</li>
+          <li>🥅 Воротар вибирає кут випадково</li>
+          <li>💎 За гол множник росте</li>
+          <li>🔥 Ризикуй або забирай виграш</li>
         </ul>
       </div>
 
       <button className={styles.startButton} onClick={() => navigate("/game")}>
-        Начать игру
+        Почати гру
       </button>
     </div>
   );
