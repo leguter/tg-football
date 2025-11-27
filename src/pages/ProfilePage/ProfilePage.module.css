@@ -415,3 +415,19 @@
 .starOption:hover {
   background: #555;
 }
+.loadMoreBtn {
+  margin: 10px auto;
+  display: block;
+  padding: 10px 16px;
+  background: #00ffc2;
+  color: #000;
+  font-weight: bold;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: 0.25s;
+}
+
+.loadMoreBtn:hover {
+  background: #00cf9b;
+}

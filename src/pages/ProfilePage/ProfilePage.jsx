@@ -320,6 +320,7 @@ export default function ProfilePage({ user }) {
   const [message, setMessage] = useState("");
 
   const starOptions = [1, 50, 100, 500, 1000];
+const [visibleCount, setVisibleCount] = useState(4);
 
   // ==============================
   // 🔹 LOAD BALANCE + HISTORY
@@ -331,19 +332,20 @@ export default function ProfilePage({ user }) {
     loadHistory();
   }, [user]);
 
-  const loadHistory = async () => {
-    try {
-      const initData = WebApp.initData;
+ const loadHistory = async () => {
+  try {
+    const initData = WebApp.initData;
+    const res = await api.post("/api/game/history", { initData });
 
-      const res = await api.post("/api/game/history", { initData });
-
-      if (res.data.success) {
-        setHistory(res.data.history);
-      }
-    } catch (err) {
-      console.error("History load error:", err);
+    if (res.data.success) {
+      setHistory(res.data.history);
+      setVisibleCount(4); // 🔥 скинути після оновлення
     }
-  };
+  } catch (err) {
+    console.error("History load error:", err);
+  }
+};
+
 
   // ==============================
   // 💰 Deposit
@@ -411,7 +413,7 @@ export default function ProfilePage({ user }) {
 
   return (
     <div className={styles.profileContainer}>
-      <h1>👤 Ваш Профіль</h1>
+      <h1>👤 Ваш Профиль</h1>
 
       {/* BALANCE */}
       <div className={styles.balanceCard}>
@@ -423,7 +425,7 @@ export default function ProfilePage({ user }) {
             Депозит
           </button>
           <button onClick={() => setShowWithdrawModal(true)} className={styles.withdrawBtn}>
-            Вивід
+            Вывод
           </button>
         </div>
       </div>
@@ -431,9 +433,10 @@ export default function ProfilePage({ user }) {
       {/* HISTORY */}
       <h2 className={styles.historyTitle}>Історія ігор</h2>
       <ul className={styles.historyList}>
-        {history.length === 0 && <p>Поки немає історії...</p>}
+        {history.length === 0 && <p>Еще нету истории...</p>}
 
-        {history.map((item, index) => (
+        {history.slice(0, visibleCount).map((item, index) => (
+
           <li
             key={index}
             className={
@@ -449,7 +452,7 @@ export default function ProfilePage({ user }) {
                 ? "⚽ Гол!"
                 : item.type === "Loss"
                 ? "❌ Промах"
-                : "💸 Вивід"}
+                : "💸 Вывод"}
             </span>
 
             <span className={styles.details}>
@@ -463,6 +466,15 @@ export default function ProfilePage({ user }) {
           </li>
         ))}
       </ul>
+      {history.length > visibleCount && (
+  <button
+    className={styles.loadMoreBtn}
+    onClick={() => setVisibleCount(prev => prev + 4)}
+  >
+    Показать еще ↓
+  </button>
+)}
+
 
       {message && <p className={styles.Message}>{message}</p>}
 
@@ -470,7 +482,7 @@ export default function ProfilePage({ user }) {
       {showDepositModal && (
         <div className={styles.modalBackdrop}>
           <div className={styles.modal}>
-            <h3>💰 Сума для депозиту</h3>
+            <h3>💰 Сума для депозита</h3>
             <div className={styles.starOptions}>
               {starOptions.map((v) => (
                 <button
@@ -485,10 +497,10 @@ export default function ProfilePage({ user }) {
 
             <div className={styles.modalActions}>
               <button className={styles.confirmBtn} onClick={handleDeposit}>
-                Підтвердити
+                Потвердить
               </button>
               <button className={styles.cancelBtn} onClick={() => setShowDepositModal(false)}>
-                Скасувати
+                Отменить
               </button>
             </div>
           </div>
@@ -499,7 +511,7 @@ export default function ProfilePage({ user }) {
       {showWithdrawModal && (
         <div className={styles.modalBackdrop}>
           <div className={styles.modal}>
-            <h3>💸 Сума для виводу</h3>
+            <h3>💸 Сума для вывода</h3>
             <div className={styles.starOptions}>
               {starOptions.map((v) => (
                 <button
@@ -514,10 +526,10 @@ export default function ProfilePage({ user }) {
 
             <div className={styles.modalActions}>
               <button className={styles.confirmBtn} onClick={handleWithdraw}>
-                Підтвердити
+                Потвердить
               </button>
               <button className={styles.cancelBtn} onClick={() => setShowWithdrawModal(false)}>
-                Скасувати
+                Отменить
               </button>
             </div>
           </div>
