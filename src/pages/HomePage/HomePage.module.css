@@ -200,3 +200,49 @@
 .ball:hover {
   animation: spinBall 0.6s infinite linear;
 }
+.ball {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  background: white;
+  position: relative;
+  margin: 0 auto 0.8rem;
+  box-shadow:
+    0 0 25px rgba(255, 255, 255, 0.6),
+    inset 0 0 25px rgba(0, 0, 0, 0.45);
+  animation: ballFloat 2.6s ease-in-out infinite;
+}
+
+/* 🔷 Чорні шістикутники */
+.ball::before,
+.ball::after {
+  content: "";
+  position: absolute;
+  width: 36%;
+  height: 36%;
+  background: #000;
+  clip-path: polygon(
+    50% 0%, 90% 25%, 90% 75%,
+    50% 100%, 10% 75%, 10% 25%
+  );
+  border-radius: 10%;
+}
+
+.ball::before {
+  top: 6%;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.ball::after {
+  bottom: 6%;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+/* ⚽ Анімація плавного руху */
+@keyframes ballFloat {
+  0% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+  100% { transform: translateY(0); }
+}
