@@ -11,7 +11,7 @@ export default function HomePage({ user }) {
           Football <span>Stars! ⭐</span>
         </h1>
         <p className={styles.subtitle}>
-          Перевір свою точність ⚽ Забий пенальті — забери зірки!
+          Проверь свою точность ⚽ Забей пенальти — забери звезды!
         </p>
       </div>
 
@@ -22,17 +22,17 @@ export default function HomePage({ user }) {
       )}
 
       <div className={styles.rulesCard}>
-        <h2>📌 Як грати?</h2>
+        <h2>📌 Как играть?</h2>
         <ul>
-          <li>⚽ Обираєш напрям удару</li>
-          <li>🥅 Воротар вибирає кут випадково</li>
-          <li>💎 За гол множник росте</li>
-          <li>🔥 Ризикуй або забирай виграш</li>
+          <li>⚽ Выбираешь направление удара</li>
+          <li>🥅 Вратарь выбирает угол случайно</li>
+          <li>💎 За гол множитель растет</li>
+          <li>🔥 Рискуй или забирай выигрыш</li>
         </ul>
       </div>
 
       <button className={styles.startButton} onClick={() => navigate("/game")}>
-        Почати гру
+        Начать игру
       </button>
     </div>
   );

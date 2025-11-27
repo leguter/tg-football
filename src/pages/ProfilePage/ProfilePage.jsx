@@ -431,7 +431,7 @@ const [visibleCount, setVisibleCount] = useState(4);
       </div>
 
       {/* HISTORY */}
-      <h2 className={styles.historyTitle}>Історія ігор</h2>
+      <h2 className={styles.historyTitle}>Істория игр</h2>
       <ul className={styles.historyList}>
         {history.length === 0 && <p>Еще нету истории...</p>}
 
