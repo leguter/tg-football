@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import styles from "./HomePage.module.css";
 import ballIcon from "../../../public/images/ball.jpg"; // добавь иконку мяча
-import starIcon from "../../assets/star_big.png";
+// import starIcon from "../../assets/star_big.png";
 
 export default function HomePage({ user }) {
   const navigate = useNavigate();
