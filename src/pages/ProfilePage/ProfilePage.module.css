@@ -265,6 +265,8 @@
   color: #ffe770;
   margin-bottom: 0.8rem;
   text-shadow: 0 0 10px #ffdb58;
+  margin-top: 0;
+  margin-bottom: 12px;
 }
 
 /* ===== Кнопки ===== */
