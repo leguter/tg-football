@@ -162,3 +162,41 @@
   transform: translateY(-3px);
   background: #00e78e;
 }
+.ball {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #fff 40%, #ccc 60%, #888 100%);
+  box-shadow:
+    0 0 12px rgba(255,255,255,0.6),
+    inset 0 0 15px rgba(0,0,0,0.4);
+  position: relative;
+  animation: ballFloat 2.6s infinite ease-in-out;
+}
+
+/* Рисую пятна мяча */
+.ball::before,
+.ball::after {
+  content: "";
+  position: absolute;
+  background: #000;
+  width: 35%;
+  height: 35%;
+  border-radius: 50%;
+  top: 5%;
+  left: 50%;
+  transform: translateX(-50%);
+  filter: drop-shadow(0 0 3px #000);
+}
+
+.ball::after {
+  top: 55%;
+}
+@keyframes spinBall {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.ball:hover {
+  animation: spinBall 0.6s infinite linear;
+}

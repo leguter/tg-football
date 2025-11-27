@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import styles from "./HomePage.module.css";
-import ballIcon from "../../../public/images/ball.jpg"; // добавь иконку мяча
+// import ballIcon from "../../../public/images/ball.jpg"; // добавь иконку мяча
 // import starIcon from "../../assets/star_big.png";
 
 export default function HomePage({ user }) {
@@ -9,7 +9,7 @@ export default function HomePage({ user }) {
   return (
     <div className={styles.container}>
       <div className={styles.heroSection}>
-        <img src={ballIcon} alt="ball" className={styles.ball} />
+        <div className={styles.ball}></div>
         <h1 className={styles.title}>
           Football <span>Stars!</span>
         </h1>
