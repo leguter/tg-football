@@ -1,24 +1,41 @@
-// src/pages/HomePage/HomePage.jsx
-import { useNavigate } from 'react-router-dom';
-import styles from './HomePage.module.css';
+import { useNavigate } from "react-router-dom";
+import styles from "./HomePage.module.css";
+import ballIcon from "../../assets/ball_glow.png"; // добавь иконку мяча
+import starIcon from "../../assets/star_big.png";
 
-export default function HomePage() {
+export default function HomePage({ user }) {
   const navigate = useNavigate();
+
   return (
-    <div className={styles.homeContainer}>
-           <h1>Добро пожаловать в Football Stars! ⭐</h1>
-      <p>Проверь свою удачу! Угадай угол, куда полетит мяч, чтобы обыграть вратаря и увеличить свой выигрыш!</p>
-      <div className={styles.infoBlock}>
-        <h2>Правила игры</h2>
+    <div className={styles.container}>
+      <div className={styles.heroSection}>
+        <img src={ballIcon} alt="ball" className={styles.ball} />
+        <h1 className={styles.title}>
+          Football <span>Stars!</span>
+        </h1>
+        <p className={styles.subtitle}>
+          Покажи свою точность ⚽ Забей пенальти — забери звезды ⭐
+        </p>
+      </div>
+
+      {user?.user?.balance !== undefined && (
+        <div className={styles.balanceCard}>
+          ⭐ Баланс: <span>{user.user.balance}</span>
+        </div>
+      )}
+
+      <div className={styles.rulesCard}>
+        <h2>📌 Как играть?</h2>
         <ul>
-          <li>Ставишь звезды и выбираешь угол.</li>
-          <li>Вратарь случайно выбирает угол.</li>
-          <li>Если забиваешь — получаешь множитель и можешь продолжить или забрать выигрыш.</li>
-          <li>Каждый следующий удар сложнее!</li>
+          <li>⚽ Выбирай направление удара</li>
+          <li>🥅 Вратарь угадывает случайно</li>
+          <li>💎 Каждый гол умножает выигрыш</li>
+          <li>🔥 Риск или выводишь звезды!</li>
         </ul>
       </div>
-      <button className={styles.startButton} onClick={() => navigate('/game')}>
-       Начать игру
+
+      <button className={styles.startButton} onClick={() => navigate("/game")}>
+        Начать игру
       </button>
     </div>
   );
