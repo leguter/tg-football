@@ -68,6 +68,7 @@
 .ball {
   width: 100px;
   animation: floatBall 2.6s infinite ease-in-out;
+  background-color: inherit;
 }
 
 @keyframes floatBall {
