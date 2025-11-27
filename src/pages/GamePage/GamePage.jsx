@@ -460,7 +460,7 @@ useEffect(() => {
         />
 
         <button onClick={handleRandomShoot} className={styles.randomButton} disabled={isShooting}>
-          Випадково
+          Рандомно
         </button>
 
         {canCashout ? (
