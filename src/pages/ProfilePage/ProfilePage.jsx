@@ -400,7 +400,7 @@ const [visibleCount, setVisibleCount] = useState(4);
       });
 
       if (res.data.success) {
-        setBalance(res.data.internal_stars);
+        setBalance(res.data.balance);
         loadHistory();
         setShowWithdrawModal(false);
       } else {
