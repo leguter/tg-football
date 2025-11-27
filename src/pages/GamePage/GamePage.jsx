@@ -339,7 +339,7 @@ useEffect(() => {
       setMultiplier(res.data.multiplier);
       setCanCashout(res.data.isGoal);
     } catch (err) {
-      alert(err?.response?.data?.message || "Помилка удару");
+      alert(err?.response?.data?.message || "Ошибка удару");
     }
 
     setTimeout(() => {
@@ -357,7 +357,7 @@ useEffect(() => {
     const initData = getInitData(user);
     try {
       const res = await api.post("/api/game/cashout", { initData });
-      alert(`⭐ Ви забрали ${res.data.winnings} зірок!`);
+      alert(`⭐ Вы получили ${res.data.winnings} звезд!`);
 
       if (typeof setUser === "function" && res.data?.balance !== undefined) {
         setUser((prev) => ({
@@ -372,7 +372,7 @@ useEffect(() => {
       setLastResult(null);
       setShowResult(false);
     } catch (err) {
-      alert(err?.response?.data?.message || "Помилка кешауту");
+      alert(err?.response?.data?.message || "Ошибка кешауту");
     }
   };
 
