@@ -83,19 +83,19 @@ const [userData, setUserData] = useState(null);
   }, []); // Пустий масив гарантує, що це виконається один раз
 
   if (userData === null) {
-    return <div>Завантаження...</div>; // Або ваш компонент завантажувача
+    return <div>Загрузка...</div>; // Або ваш компонент завантажувача
   }
 
   if (userData?.error) {
-    return <div>Запустіть додаток через Telegram для авторизації</div>;
+    return <div>Запустите приложение через Telegram для авторизации</div>;
   } // Empty array ensures this runs once
 
   if (userData === null) {
-    return <div>Завантаження...</div>; // Or your loader component
+    return <div>Загрузка...</div>; // Or your loader component
   }
 
   if (userData?.error) {
-    return <div>Запустіть додаток через Telegram для авторизації</div>;
+    return <div>Запустите приложение через Telegram для авторизации</div>;
   }
 
   // When authorized — show GamePage
