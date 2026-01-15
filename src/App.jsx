@@ -63,6 +63,7 @@ useEffect(() => {
 }, []);
  // Пустий масив гарантує, що це виконається один раз
 if (userData === null && !authError) {
+  console.log(userData)
   return <div>Загрузка...</div>;
 }
 
