@@ -12,6 +12,8 @@
   width: 90%;
   max-width: 420px;
   font-size: 1rem;
+      position: fixed;
+    /* top: 10; */
 }
 
 .multiplier {
