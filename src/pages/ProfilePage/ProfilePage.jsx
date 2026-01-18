@@ -326,8 +326,8 @@ const [visibleCount, setVisibleCount] = useState(4);
   // 🔹 LOAD BALANCE + HISTORY
   // ==============================
   useEffect(() => {
-    if (user?.user?.balance !== undefined) {
-      setBalance(user?.user?.balance ?? user?.balance);
+    if (user?.user?.balance ?? user?.balance !== undefined) {
+      setBalance(user.balance);
     }
     loadHistory();
   }, [user]);
