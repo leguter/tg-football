@@ -378,7 +378,7 @@ useEffect(() => {
 
   return (
     <div className={styles.gameContainer}>
-      <div className={styles.infoBar}>
+      {/* <div className={styles.infoBar}>
   <p>
     Умножитель: <span className={styles.multiplier}>{multiplier.toFixed(2)}x</span>
   </p>
@@ -390,7 +390,7 @@ useEffect(() => {
   <p>
     Баланс: <span className={styles.infoBarStar}>⭐</span> {user?.user?.balance ?? 0}
   </p>
-</div>
+</div> */}
 
        
       <div className={styles.field}>
@@ -406,6 +406,19 @@ useEffect(() => {
 )}
 
         <div className={styles.goalBackground}>
+             <div className={styles.infoBar}>
+  <p>
+    Умножитель: <span className={styles.multiplier}>{multiplier.toFixed(2)}x</span>
+  </p>
+
+  <p>
+    Ставка: <span className={styles.infoBarStar}>⭐</span> {stake}
+  </p>
+
+  <p>
+    Баланс: <span className={styles.infoBarStar}>⭐</span> {user?.user?.balance ?? 0}
+  </p>
+</div>
           <div className={styles.goalFrame}>
             {GAME_ANGLES.map((angle) => (
               <button
