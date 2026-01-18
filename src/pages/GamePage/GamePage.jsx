@@ -416,7 +416,7 @@ useEffect(() => {
   </p>
 
   <p>
-    Баланс: <span className={styles.infoBarStar}>⭐</span> {user?.user?.balance ?? 0}
+    Баланс: <span className={styles.infoBarStar}>⭐</span> {user?.user?.balance ?? user?.balance ?? 0}
   </p>
 </div>
           <div className={styles.goalFrame}>
