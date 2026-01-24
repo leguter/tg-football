@@ -12,7 +12,7 @@
   left: 0;
   width: 100%; 
   height: 100%;
-  background-image: url('grass.jpg'); /* Ваше фото газону */
+  background-image: url('/images/grass.jpg'); /* Ваше фото газону */
   background-size: cover;
   background-position: center;
   
