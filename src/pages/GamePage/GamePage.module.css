@@ -5,13 +5,13 @@
   gap: 16px;
   color: #fff;
 }
-.gameContainer {
+/* .gameContainer {
   min-height: 100vh;
   background-image: url("../../assets/grass.jpg");
-  background-size: cover;       /* або contain — якщо треба вписати */
+  background-size: cover;      
   background-position: center;
   background-repeat: no-repeat;
-  background-attachment: fixed; /* щоб фон не рухався при скролі */
+  background-attachment: fixed;
 }
 .gameContainer {
   position: relative;
@@ -23,10 +23,10 @@
   content: "";
   position: absolute;
   inset: 0;
-  background: rgba(0, 0, 0, 0.6); /* прозорий чорний шар */
+  background: rgba(0, 0, 0, 0.6);
   backdrop-filter: blur(2px);
   z-index: 0;
-}
+} */
 /* .gameContainer::before {
   content: "";
   position: absolute;
