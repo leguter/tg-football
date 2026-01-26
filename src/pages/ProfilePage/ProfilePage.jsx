@@ -319,7 +319,7 @@ export default function ProfilePage({ user }) {
   const [amount, setSelectedAmount] = useState(100);
   const [message, setMessage] = useState("");
 
-  const starOptions = [10, 50, 100, 500, 1000];
+  const starOptions = [1, 50, 100, 500, 1000];
 const [visibleCount, setVisibleCount] = useState(4);
 
   // ==============================
